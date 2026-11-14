@@ -277,12 +277,36 @@ export function buildUI(state, handlers) {
     importRefs[key] = { card, button, total };
   }
 
-  /* Research cards -------------------------------------------------------- */
+  /* Research tree -------------------------------------------------------- */
   const researchRefs = {};
+  
+  // Build tier sections
+  for (const tierInfo of RESEARCH_TIERS) {
+    const tierSection = document.createElement('section');
+    tierSection.className = 'research-tier';
+    tierSection.innerHTML = `
+      <div class="tier-header">
+        <span class="tier-number">Tier ${tierInfo.tier}</span>
+        <div class="tier-info">
+          <h3>${tierInfo.name}</h3>
+          <p class="tier-desc">${tierInfo.desc}</p>
+        </div>
+      </div>
+      <div class="tier-nodes" data-tier="${tierInfo.tier}"></div>
+      <div class="tier-connector" style="${tierInfo.tier < RESEARCH_TIERS.length ? '' : 'display:none'}"></div>
+    `;
+    researchGrid.append(tierSection);
+  }
+  
+  // Create research nodes and place in tiers
   for (const id of RESEARCH_ORDER) {
     const def = RESEARCH[id];
+    const tier = def.tier || 1;
+    const tierContainer = researchGrid.querySelector(`.tier-nodes[data-tier="${tier}"]`);
+    
     const card = document.createElement('article');
-    card.className = 'research-card';
+    card.className = 'research-node';
+    card.dataset.researchId = id;
     card.innerHTML = `
       <header class="research-head">
         <span class="card-icon" aria-hidden="true">${RESEARCH_ICONS[id] ?? '\u{1F52C}'}</span>
@@ -290,7 +314,7 @@ export function buildUI(state, handlers) {
           <h3>${def.name}</h3>
           <p class="blurb">${def.blurb}</p>
         </div>
-        <span class="research-state" data-state>Available</span>
+        <span class="research-state" data-state>Locked</span>
       </header>
       <div class="research-meta">
         <span class="chip">⏱ ${def.hours}h</span>
@@ -318,7 +342,7 @@ export function buildUI(state, handlers) {
     const button = card.querySelector('[data-start]');
     button.addEventListener('click', () => handlers.onResearch(id));
 
-    researchGrid.append(card);
+    if (tierContainer) tierContainer.append(card);
     researchRefs[id] = {
       card,
       state: card.querySelector('[data-state]'),
@@ -329,6 +353,9 @@ export function buildUI(state, handlers) {
       progressText: card.querySelector('[data-progress-text]'),
     };
   }
+  
+  // Draw connecting lines between tiers
+  requestAnimationFrame(() => drawResearchConnections(researchGrid));
 
   /* Crew panel ------------------------------------------------------------ */
   crew.innerHTML = `
@@ -1117,6 +1144,53 @@ function renderResearch(state, ui, idle) {
                 : 'Start research';
     }
   }
+}
+
+/* Draw connecting lines between research tiers */
+function drawResearchConnections(container) {
+  const tierNodes = container.querySelectorAll('.tier-nodes');
+  const connectorHeight = 40; // Space for connectors between tiers
+  
+  // Add CSS for connectors if not already added
+  if (!document.getElementById('research-connector-style')) {
+    const style = document.createElement('style');
+    style.id = 'research-connector-style';
+    style.textContent = `
+      .research-tier { position: relative; }
+      .tier-connector { 
+        position: absolute; 
+        left: 50%; 
+        top: 100%; 
+        width: 2px; 
+        height: 40px; 
+        background: linear-gradient(180deg, var(--accent), transparent); 
+        transform: translateX(-50%); 
+        z-index: 1; 
+      }
+      .tier-connector::before {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 50%;
+        width: 0;
+        height: 0;
+        border-left: 6px solid transparent;
+        border-right: 6px solid transparent;
+        border-top: 8px solid var(--accent);
+        transform: translateX(-50%);
+      }
+    `;
+    document.head.appendChild(style);
+  }
+  
+  tierNodes.forEach((nodes, index) => {
+    if (index < tierNodes.length - 1) {
+      // Find the center of the tier nodes
+      const nodeRect = nodes.getBoundingClientRect();
+      const containerRect = container.getBoundingClientRect();
+      // The connector is already positioned via CSS
+    }
+  });
 }
 
 /* --------------------------------------------------------------------------
