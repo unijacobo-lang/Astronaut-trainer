@@ -153,6 +153,7 @@ const buildingDefs = {
     power: 5,
     capacity: 4,
     maintenance: 0.03,
+    category: 'life',
   },
   solar: {
     name: 'Solar Array',
@@ -164,6 +165,7 @@ const buildingDefs = {
     power: 0,
     output: { power: 18 },
     maintenance: 0.02,
+    category: 'power',
   },
   battery: {
     name: 'Battery Bank',
@@ -175,6 +177,7 @@ const buildingDefs = {
     power: 0,
     storage: 300,
     maintenance: 0.012,
+    category: 'power',
   },
   oxygenGenerator: {
     name: 'Oxygen Generator',
@@ -186,6 +189,7 @@ const buildingDefs = {
     power: 3,
     output: { oxygen: 9, water: -10.8 },
     maintenance: 0.035,
+    category: 'life',
   },
   waterReclaimer: {
     name: 'Water Reclaimer',
@@ -198,6 +202,7 @@ const buildingDefs = {
     output: { water: 18 },
     maintenance: 0.045,
     requires: 'waterRecycling',
+    category: 'life',
   },
   greenhouse: {
     name: 'Greenhouse',
@@ -210,6 +215,7 @@ const buildingDefs = {
     output: { food: 6.5, water: -26 },
     maintenance: 0.05,
     requires: 'hydroponics',
+    category: 'life',
   },
   fabricator: {
     name: 'Regolith Fabricator',
@@ -222,6 +228,7 @@ const buildingDefs = {
     output: { materials: 35 },
     maintenance: 0.05,
     requires: 'fabrication',
+    category: 'industry',
   },
   lab: {
     name: 'Research Lab',
@@ -232,6 +239,7 @@ const buildingDefs = {
     crew: 1,
     power: 4,
     maintenance: 0.03,
+    category: 'science',
   },
   shelter: {
     name: 'Radiation Shelter',
@@ -244,6 +252,7 @@ const buildingDefs = {
     capacity: 0,
     shelterCapacity: 6,
     maintenance: 0.025,
+    category: 'life',
   },
 };
 
@@ -253,6 +262,14 @@ export const BUILDING_ORDER = [
   'waterReclaimer', 'greenhouse', 'fabricator',
   'lab', 'shelter'
 ];
+
+/** Building categories for UI grouping. */
+export const BUILDING_CATEGORIES = {
+  life: { name: 'Life Support', icon: '\u{1FAD7}', order: 0 },
+  power: { name: 'Power', icon: '\u{26A1}', order: 1 },
+  industry: { name: 'Industry', icon: '\u{1F3D7}\u{FE0F}', order: 2 },
+  science: { name: 'Science', icon: '\u{1F52C}', order: 3 },
+};
 
 /** Exported buildings object with all definitions. */
 export const BUILDINGS = buildingDefs;

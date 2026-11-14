@@ -11,6 +11,7 @@ import {
   BALANCE,
   BUILDINGS,
   BUILDING_ORDER,
+  BUILDING_CATEGORIES,
   RESEARCH,
   RESEARCH_ICONS,
   RESEARCH_ORDER,
@@ -163,65 +164,85 @@ export function buildUI(state, handlers) {
 
   /* Building cards -------------------------------------------------------- */
   const cardRefs = {};
-  for (const id of BUILDING_ORDER) {
-    const def = BUILDINGS[id];
-    const card = document.createElement('article');
-    card.className = 'card';
-    card.innerHTML = `
-      <header class="card-head">
-        <span class="card-icon" aria-hidden="true">${def.icon}</span>
-        <div class="card-titles">
-          <h3>${def.name}</h3>
-          <p class="blurb">${def.blurb}</p>
-        </div>
-        <span class="count" data-count>×0</span>
-      </header>
-      <div class="effects" data-effects></div>
-      <div class="card-progress" data-progress hidden>
-        <div class="bar"><span data-progress-bar></span></div>
-        <span class="card-progress-text" data-progress-text></span>
-      </div>
-      <div class="card-note" data-note hidden></div>
-      <div class="card-foot">
-        <div class="cost" data-cost></div>
-        <button class="btn build-btn" type="button" data-build>Build</button>
-      </div>
+
+  // Group buildings by category and render with section headers
+  const categories = Object.entries(BUILDING_CATEGORIES).sort((a, b) => a[1].order - b[1].order);
+
+  for (const [catKey, catDef] of categories) {
+    const catBuildings = BUILDING_ORDER.filter(id => BUILDINGS[id].category === catKey);
+    if (!catBuildings.length) continue;
+
+    // Create category section
+    const section = document.createElement('section');
+    section.className = 'building-category';
+    section.innerHTML = `
+      <h3 class="category-title"><span class="cat-icon">${catDef.icon}</span>${catDef.name}</h3>
+      <div class="building-grid" data-category="${catKey}"></div>
     `;
+    const grid = section.querySelector('.building-grid');
 
-    const effects = card.querySelector('[data-effects]');
-    for (const chip of effectChips(def)) {
-      const el = document.createElement('span');
-      el.className = 'chip';
-      el.textContent = chip.text;
-      el.title = chip.title;
-      effects.append(el);
+    for (const id of catBuildings) {
+      const def = BUILDINGS[id];
+      const card = document.createElement('article');
+      card.className = 'building-card';
+      card.innerHTML = `
+        <span class="card-icon" aria-hidden="true">${def.icon}</span>
+        <div class="card-info">
+          <h4>${def.name}</h4>
+          <p class="card-blurb">${def.blurb}</p>
+        </div>
+        <div class="card-details">
+          <span class="card-count" data-count>×0</span>
+          <div class="card-effects" data-effects></div>
+        </div>
+        <div class="card-footer">
+          <div class="card-cost" data-cost></div>
+          <button class="btn build-btn" type="button" data-build>Build</button>
+        </div>
+        <div class="card-progress" data-progress hidden>
+          <div class="bar"><span data-progress-bar></span></div>
+          <span class="card-progress-text" data-progress-text></span>
+        </div>
+        <div class="card-note" data-note hidden></div>
+      `;
+
+      const effects = card.querySelector('[data-effects]');
+      for (const chip of effectChips(def)) {
+        const el = document.createElement('span');
+        el.className = 'chip';
+        el.textContent = chip.text;
+        el.title = chip.title;
+        effects.append(el);
+      }
+
+      const costEl = card.querySelector('[data-cost]');
+      const costChips = {};
+      for (const [key, amount] of Object.entries(def.cost)) {
+        const chip = document.createElement('span');
+        chip.className = 'chip cost-chip';
+        chip.innerHTML = `${RESOURCES[key]?.icon ?? ''} <span data-cost-value>${costText(key, amount)}</span>`;
+        chip.title = RESOURCES[key]?.name ?? key;
+        costEl.append(chip);
+        costChips[key] = chip;
+      }
+
+      const button = card.querySelector('[data-build]');
+      button.addEventListener('click', () => handlers.onBuild(id));
+
+      grid.append(card);
+      cardRefs[id] = {
+        card,
+        count: card.querySelector('[data-count]'),
+        button,
+        costChips,
+        progress: card.querySelector('[data-progress]'),
+        progressBar: card.querySelector('[data-progress-bar]'),
+        progressText: card.querySelector('[data-progress-text]'),
+        note: card.querySelector('[data-note]'),
+      };
     }
 
-    const costEl = card.querySelector('[data-cost]');
-    const costChips = {};
-    for (const [key, amount] of Object.entries(def.cost)) {
-      const chip = document.createElement('span');
-      chip.className = 'chip cost-chip';
-      chip.innerHTML = `${RESOURCES[key]?.icon ?? ''} <span data-cost-value>${costText(key, amount)}</span>`;
-      chip.title = RESOURCES[key]?.name ?? key;
-      costEl.append(chip);
-      costChips[key] = chip;
-    }
-
-    const button = card.querySelector('[data-build]');
-    button.addEventListener('click', () => handlers.onBuild(id));
-
-    buildings.append(card);
-    cardRefs[id] = {
-      card,
-      count: card.querySelector('[data-count]'),
-      button,
-      costChips,
-      progress: card.querySelector('[data-progress]'),
-      progressBar: card.querySelector('[data-progress-bar]'),
-      progressText: card.querySelector('[data-progress-text]'),
-      note: card.querySelector('[data-note]'),
-    };
+    buildings.append(section);
   }
 
   /* Earth imports --------------------------------------------------------- */

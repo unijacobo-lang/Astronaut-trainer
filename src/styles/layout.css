@@ -82,19 +82,23 @@ button { font: inherit; }
 
 .resource-bar {
   display: flex;
-  flex: 1;
   flex-wrap: wrap;
   gap: 8px;
   align-items: stretch;
+  padding: 8px 0;
+  border-top: 1px solid var(--line);
+  border-bottom: 1px solid var(--line);
+  background: rgba(16, 22, 33, 0.5);
+  margin-bottom: 8px;
 }
 
 .res {
   display: flex;
   align-items: center;
   gap: 8px;
-  min-width: 118px;
-  padding: 6px 9px;
-  border-radius: 11px;
+  min-width: 100px;
+  padding: 5px 8px;
+  border-radius: 10px;
   border: 1px solid var(--line);
   background: rgba(255, 255, 255, 0.035);
   transition: border-color 0.15s ease, background 0.15s ease;

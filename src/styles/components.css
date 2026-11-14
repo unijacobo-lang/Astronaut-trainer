@@ -34,8 +34,8 @@
 .effects, .cost, .research-meta, .mission-meta { display: flex; flex-wrap: wrap; gap: 5px; }
 
 .chip {
-  display: inline-flex; align-items: center; gap: 3px; padding: 3px 7px;
-  border-radius: 999px; font-size: 10.5px; color: #c8d6e6;
+  display: inline-flex; align-items: center; gap: 4px; padding: 3px 8px;
+  border-radius: 999px; font-size: 10px; color: #c8d6e6;
   background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(170, 196, 224, 0.12); white-space: nowrap;
 }
 
@@ -55,6 +55,48 @@
 .bar > span.is-good { background: linear-gradient(90deg, #4fbf7b, #8be0b0); }
 .bar > span.is-warn { background: linear-gradient(90deg, #d99a3e, #ffc266); }
 .bar > span.is-bad { background: linear-gradient(90deg, #c94d4d, #ff7a7a); }
+
+/* --------------------------------------------------------------------------
+   Building Categories & Horizontal Cards
+   ------------------------------------------------------------------------ */
+
+.building-container { display: flex; flex-direction: column; gap: 16px; }
+
+.building-category { background: rgba(255, 255, 255, 0.02); border: 1px solid var(--line); border-radius: var(--radius); padding: 12px; }
+
+.category-title { display: flex; align-items: center; gap: 8px; font-size: 13px; font-weight: 600; color: var(--accent); margin: 0 0 12px; padding-bottom: 8px; border-bottom: 1px solid var(--line); }
+
+.cat-icon { font-size: 16px; }
+
+.building-grid { display: flex; flex-direction: column; gap: 10px; }
+
+/* Horizontal building card layout - full width rows */
+.building-card { display: grid; grid-template-columns: 56px 1fr 120px auto; gap: 20px; align-items: center; padding: 14px 16px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: rgba(255, 255, 255, 0.025); transition: border-color 0.15s ease, background 0.15s ease; width: 100%; min-height: 72px; }
+
+.building-card:hover { border-color: rgba(111, 183, 255, 0.28); background: rgba(111, 183, 255, 0.045); }
+.building-card.is-owned { border-color: rgba(126, 224, 160, 0.22); }
+.building-card.is-locked { border-color: rgba(255, 194, 102, 0.22); background: rgba(255, 194, 102, 0.03); }
+
+.card-header { display: flex; align-items: center; gap: 12px; min-width: 0; }
+.card-icon { display: grid; place-items: center; width: 44px; height: 44px; flex: 0 0 auto; border-radius: 10px; font-size: 22px; background: rgba(111, 183, 255, 0.1); border: 1px solid rgba(111, 183, 255, 0.18); }
+.card-info { min-width: 0; flex: 1; }
+.card-info h4 { font-size: 13px; line-height: 1.2; margin: 0; }
+.card-blurb { margin: 2px 0 0; font-size: 10.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.card-count { font-size: 12px; font-weight: 700; color: var(--accent-2); white-space: nowrap; display: block; margin-bottom: 4px; }
+
+.card-details { display: flex; flex-direction: column; align-items: flex-end; min-width: 100px; }
+
+.card-effects { display: flex; flex-wrap: wrap; gap: 6px; justify-content: flex-end; }
+
+.card-progress { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 3px; }
+
+.card-progress { grid-column: 1 / -1; display: flex; flex-direction: column; gap: 3px; margin-top: 8px; padding-top: 8px; border-top: 1px solid var(--line); }
+
+.card-note { grid-column: 1 / -1; padding: 6px 10px; border-radius: 6px; font-size: 10px; color: var(--warn); background: rgba(255, 194, 102, 0.07); border: 1px solid rgba(255, 194, 102, 0.2); margin-top: 4px; }
+
+.card-footer { display: flex; align-items: center; gap: 16px; padding-top: 8px; justify-content: flex-end; }
+.card-cost { display: flex; flex-wrap: wrap; gap: 6px; flex: 1; }
+.build-btn { flex: 0 0 auto; white-space: nowrap; }
 
 /* --------------------------------------------------------------------------
    Structure List

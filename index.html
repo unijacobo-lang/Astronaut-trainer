@@ -20,8 +20,6 @@
         </div>
       </div>
 
-      <div id="resource-bar" class="resource-bar" aria-label="Base status"></div>
-
       <div class="controls">
         <button id="btn-pause" class="btn" type="button" title="Pause (Space)">Pause</button>
         <div class="speed" role="group" aria-label="Game speed">
@@ -32,6 +30,8 @@
         <button id="btn-reset" class="btn btn-ghost" type="button">New base</button>
       </div>
     </header>
+
+    <div id="resource-bar" class="resource-bar" aria-label="Base status"></div>
 
     <nav class="tabbar" id="tabbar" role="tablist" aria-label="Sections">
       <button class="tab is-active" type="button" role="tab" aria-selected="true" data-tab="base">Base</button>
@@ -66,7 +66,7 @@
             </div>
             <div id="stats" class="stats" aria-label="Base summary"></div>
           </div>
-          <div id="buildings" class="building-grid"></div>
+          <div id="buildings" class="building-container"></div>
         </section>
 
         <div class="split" data-panel="base">
