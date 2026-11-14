@@ -39,10 +39,18 @@ if (!state) {
 
 const scene = (() => {
   try {
-    return createScene(document.getElementById('scene'));
+    const canvas = document.getElementById('scene');
+    console.log('[main] Canvas element:', canvas);
+    if (!canvas) {
+      console.error('[main] Canvas element not found!');
+      return { draw() {} };
+    }
+    const scene = createScene(canvas);
+    console.log('[main] Scene created successfully');
+    return scene;
   } catch (error) {
     // The base view is decorative; never let it stop the game loop.
-    console.warn('Base view unavailable:', error);
+    console.error('[main] Base view error:', error);
     return { draw() {} };
   }
 })();

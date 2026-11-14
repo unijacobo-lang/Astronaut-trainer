@@ -427,14 +427,26 @@ function paintBackground(random) {
  * @returns {{draw: (state: object, dt?: number) => void}}
  */
 export function createScene(canvas) {
-  if (!canvas) return { draw() {} };
+  if (!canvas) {
+    console.error('[scene] No canvas provided');
+    return { draw() {} };
+  }
+
+  console.log('[scene] Canvas found:', canvas.width, 'x', canvas.height);
 
   const ctx = canvas.getContext('2d');
+  if (!ctx) {
+    console.error('[scene] Failed to get 2D context');
+    return { draw() {} };
+  }
+  console.log('[scene] 2D context created');
+
   const dpr = Math.min(2, window.devicePixelRatio || 1);
   canvas.width = Math.round(W * dpr);
   canvas.height = Math.round(H * dpr);
   ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
   ctx.imageSmoothingEnabled = false;
+  console.log('[scene] Canvas sized to:', canvas.width, 'x', canvas.height, 'DPR:', dpr);
 
   const sprites = buildSprites();
   const random = rng(20261114);
@@ -456,7 +468,17 @@ export function createScene(canvas) {
   return {
     /** Advance the decorative clock and repaint. dt is real seconds. */
     draw(state, dt = 0) {
+      if (!state) {
+        console.warn('[scene.draw] No state provided');
+        return;
+      }
       if (!state.paused) clock += dt * (state.speed ?? 1);
+
+      try {
+        ctx.drawImage(background, 0, 0, W, H);
+      } catch (e) {
+        console.error('[scene.draw] Error drawing background:', e);
+      }
 
       ctx.drawImage(background, 0, 0, W, H);
 
