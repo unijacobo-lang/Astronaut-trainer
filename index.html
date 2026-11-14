@@ -13,10 +13,10 @@
   <div class="app">
     <header class="topbar">
       <div class="brand">
-        <span class="brand-mark" aria-hidden="true">\u{263E}</span>
+        <span class="brand-mark" aria-hidden="true">☾</span>
         <div>
           <h1>Lunar Outpost</h1>
-          <p id="brand-sub">base management \u{00B7} year 1</p>
+          <p id="brand-sub">base management · year 1</p>
         </div>
       </div>
 
@@ -25,9 +25,9 @@
       <div class="controls">
         <button id="btn-pause" class="btn" type="button" title="Pause (Space)">Pause</button>
         <div class="speed" role="group" aria-label="Game speed">
-          <button class="btn speed-btn is-active" type="button" data-speed="1" title="1\u{00D7} \u{2014} 6 hours per second">1\u{00D7}</button>
-          <button class="btn speed-btn" type="button" data-speed="2" title="2\u{00D7} \u{2014} 12 hours per second">2\u{00D7}</button>
-          <button class="btn speed-btn" type="button" data-speed="4" title="4\u{00D7} \u{2014} 24 hours per second">4\u{00D7}</button>
+          <button class="btn speed-btn is-active" type="button" data-speed="1" title="1× — 6 hours per second">1×</button>
+          <button class="btn speed-btn" type="button" data-speed="2" title="2× — 12 hours per second">2×</button>
+          <button class="btn speed-btn" type="button" data-speed="4" title="4× — 24 hours per second">4×</button>
         </div>
         <button id="btn-reset" class="btn btn-ghost" type="button">New base</button>
       </div>
@@ -41,7 +41,7 @@
       <button class="tab" type="button" role="tab" aria-selected="false" data-tab="missions">
         Missions <span class="tab-badge" id="badge-missions" hidden></span>
       </button>
-      <button class="tab" type="button" role="tab" aria-selected="false" data-tab="structures">Structures</button>
+      <button class="tab" type="button" role="tab" aria-selected="false" data-tab="crew">Crew</button>
     </nav>
 
     <main class="layout">
@@ -50,9 +50,9 @@
           <div class="scene-wrap">
             <canvas id="scene" class="scene" width="960" height="400" role="img" aria-label="Live view of the lunar base"></canvas>
             <div class="scene-hud" aria-hidden="true">
-              <span class="scene-chip" id="hud-o2">O\u{2082} 21.0%</span>
-              <span class="scene-chip" id="hud-power">\u{26A1} 18 / 14 kW</span>
-              <span class="scene-chip" id="hud-rad">\u{2622} 260 \u{00B5}Sv/h</span>
+              <span class="scene-chip" id="hud-o2">O₂ 21.0%</span>
+              <span class="scene-chip" id="hud-power">⚡ 18 / 14 kW</span>
+              <span class="scene-chip" id="hud-rad">☢ 260 µSv/h</span>
             </div>
             <div id="alerts" class="alerts" aria-live="polite"></div>
           </div>
@@ -66,51 +66,71 @@
             </div>
             <div id="stats" class="stats" aria-label="Base summary"></div>
           </div>
-          <div id="buildings" class="building-container"></div>
+          <div id="buildings" class="building-grid"></div>
         </section>
+
+        <div class="split" data-panel="base">
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Structures</h2>
+              <span class="panel-sub" id="structure-count"></span>
+            </div>
+            <div id="structures" class="structure-list"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Earth Imports</h2>
+            </div>
+            <p class="panel-sub">Every kilogram launched from Earth is expensive. Imports include a flat launch fee.</p>
+            <div id="imports" class="import-grid"></div>
+          </section>
+        </div>
 
         <section class="panel" data-panel="research" hidden>
           <div class="panel-head">
             <div>
-              <h2>Research Tree</h2>
-              <p class="panel-sub">Unlock new buildings and upgrades. Complete prerequisites to advance tiers.</p>
+              <h2>Research</h2>
+              <p class="panel-sub">The lab runs one project at a time. A failed project loses every invested resource.</p>
             </div>
             <div id="research-status" class="research-status"></div>
           </div>
-          <div id="research-tree" class="research-tree"></div>
+          <div id="research" class="research-grid"></div>
         </section>
 
         <section class="panel" data-panel="missions" hidden>
           <div class="panel-head">
             <div>
               <h2>Missions</h2>
-              <p class="panel-sub">One mission per year. Failure ends the run; success brings supplies, funds, crew or research bonuses.</p>
+              <p class="panel-sub">One mission per year. Failing a mission ends the run; success brings supplies, funds, crew or research bonuses.</p>
             </div>
           </div>
           <div id="mission" class="mission"></div>
           <div id="mission-history" class="history"></div>
         </section>
 
-        <section class="panel" data-panel="structures" hidden>
+        <section class="panel" data-panel="crew" hidden>
           <div class="panel-head">
-            <h2>Structures & Maintenance</h2>
-            <span class="panel-sub" id="structure-count"></span>
+            <div>
+              <h2>Crew</h2>
+              <p class="panel-sub">Astronauts are never consumed by a task — they are only occupied until it finishes.</p>
+            </div>
           </div>
-          <div id="structures" class="structure-list"></div>
+          <div id="crew" class="crew"></div>
         </section>
       </div>
 
       <aside class="panel panel-log">
         <div class="panel-head">
           <h2>Log</h2>
-          <span class="panel-sub" id="clock">Y1 \u{00B7} D1 \u{00B7} 00:00</span>
+          <span class="panel-sub" id="clock">Y1 · D1 · 00:00</span>
         </div>
         <ul id="log" class="log" aria-live="polite"></ul>
       </aside>
     </main>
 
     <footer class="footer">
-      <span>Space \u{2014} pause \u{00B7} 1 / 2 / 4 \u{2014} speed \u{00B7} tabs: Base / Research / Missions / Structures</span>
+      <span>Space — pause &nbsp;·&nbsp; 1 / 2 / 4 — speed &nbsp;·&nbsp; tabs: Base / Research / Missions / Crew</span>
       <span id="save-status" class="save-status">autosaving</span>
     </footer>
   </div>
