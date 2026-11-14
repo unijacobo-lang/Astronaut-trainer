@@ -279,107 +279,66 @@ export const BUILDINGS = buildingDefs;
    ------------------------------------------------------------------------ */
 
 const researchDefs = {
-  // TIER 1: Foundation
   waterRecycling: {
     name: 'Water Recycling',
-    blurb: 'Unlocks the Water Reclaimer. Recovers water from air and waste.',
-    cost: { money: 2_500_000, water: 150, food: 50, oxygen: 30 },
+    blurb: 'Unlocks the Water Reclaimer.',
+    cost: { money: 3_000_000, water: 150, food: 50, oxygen: 30 },
     crew: 1, hours: 200, chance: 0.75, unlocks: ['waterReclaimer'],
-    requires: [],
-    tier: 1,
   },
-  
-  // TIER 2: Life Support Upgrades
-  highYieldElectrolysis: {
-    name: 'High-Yield Electrolysis',
-    blurb: 'Oxygen generators produce 25% more O₂ from the same water.',
-    cost: { money: 2_500_000, water: 100, food: 40, oxygen: 25 },
-    crew: 1, hours: 180, chance: 0.8, effects: { oxygenOutput: 1.25 },
-    requires: ['waterRecycling'],
-    tier: 2,
-  },
-  closedLoopLifeSupport: {
-    name: 'Closed-Loop Life Support',
-    blurb: 'Crew consume 15% less food through advanced recycling.',
-    cost: { money: 3_500_000, water: 130, food: 75, oxygen: 40 },
-    crew: 2, hours: 300, chance: 0.7, effects: { foodConsumption: 0.85 },
-    requires: ['waterRecycling'],
-    tier: 2,
-  },
-  
-  // TIER 3: Food Production
   hydroponics: {
     name: 'Hydroponics',
-    blurb: 'Unlocks the Greenhouse. Grow food from water and nutrients.',
+    blurb: 'Unlocks the Greenhouse.',
     cost: { money: 3_500_000, water: 220, food: 40, oxygen: 35 },
     crew: 1, hours: 280, chance: 0.7, unlocks: ['greenhouse'],
-    requires: ['highYieldElectrolysis', 'closedLoopLifeSupport'],
-    tier: 3,
   },
-  
-  // TIER 4: Power & Shielding
-  solarTracking: {
-    name: 'Solar Tracking',
-    blurb: 'Solar arrays produce 30% more power by following the sun.',
-    cost: { money: 2_200_000, water: 80, food: 40, oxygen: 25 },
-    crew: 1, hours: 180, chance: 0.8, effects: { solarOutput: 1.3 },
-    requires: ['hydroponics'],
-    tier: 4,
+  fabrication: {
+    name: 'In-Situ Fabrication',
+    blurb: 'Unlocks the Regolith Fabricator.',
+    cost: { money: 4_500_000, water: 130, food: 60, oxygen: 40 },
+    crew: 2, hours: 350, chance: 0.65, unlocks: ['fabricator'], requires: ['hydroponics'],
+  },
+  highYieldElectrolysis: {
+    name: 'High-Yield Electrolysis',
+    blurb: 'Oxygen generators produce 25% more O2.',
+    cost: { money: 2_500_000, water: 100, food: 40, oxygen: 25 },
+    crew: 1, hours: 180, chance: 0.8, effects: { oxygenOutput: 1.25 },
   },
   reinforcedShielding: {
     name: 'Reinforced Shielding',
-    blurb: 'Radiation shield degrades 30% slower during storms.',
+    blurb: 'The radiation shield degrades 30% slower.',
     cost: { money: 3_000_000, water: 80, food: 50, oxygen: 50 },
     crew: 1, hours: 250, chance: 0.65, effects: { shieldWear: 0.7 },
-    requires: ['hydroponics'],
-    tier: 4,
   },
-  
-  // TIER 5: Advanced Production
-  fabrication: {
-    name: 'In-Situ Fabrication',
-    blurb: 'Unlocks the Regolith Fabricator. Produce materials from lunar dust.',
-    cost: { money: 4_500_000, water: 130, food: 60, oxygen: 40 },
-    crew: 2, hours: 350, chance: 0.65, unlocks: ['fabricator'],
-    requires: ['solarTracking', 'reinforcedShielding'],
-    tier: 5,
+  solarTracking: {
+    name: 'Solar Tracking',
+    blurb: 'Solar arrays produce 30% more power.',
+    cost: { money: 2_200_000, water: 80, food: 40, oxygen: 25 },
+    crew: 1, hours: 180, chance: 0.8, effects: { solarOutput: 1.3 },
   },
-  
-  // TIER 6: Medical & Habitat
+  closedLoopLifeSupport: {
+    name: 'Closed-Loop Life Support',
+    blurb: 'Crew consume 15% less food.',
+    cost: { money: 3_500_000, water: 130, food: 75, oxygen: 40 },
+    crew: 2, hours: 300, chance: 0.7, effects: { foodConsumption: 0.85 }, requires: ['waterRecycling'],
+  },
   radiationMedicine: {
     name: 'Radiation Medicine',
-    blurb: 'Crew resist radiation sickness 40% better. Reduces illness duration.',
+    blurb: 'Crew resist radiation sickness 40% better.',
     cost: { money: 2_800_000, water: 100, food: 60, oxygen: 35 },
     crew: 1, hours: 220, chance: 0.6, effects: { radiationResistance: 0.6 },
-    requires: ['fabrication'],
-    tier: 6,
   },
   habitatExpansion: {
     name: 'Expandable Habitats',
-    blurb: 'Each habitat houses 1 extra astronaut. Increases capacity to 5.',
+    blurb: 'Each habitat houses one extra astronaut.',
     cost: { money: 4_000_000, water: 100, food: 70, oxygen: 40 },
-    crew: 2, hours: 320, chance: 0.75, effects: { habitatCapacity: 1 },
-    requires: ['radiationMedicine'],
-    tier: 6,
+    crew: 2, hours: 320, chance: 0.75, effects: { habitatCapacity: 1 }, requires: ['hydroponics'],
   },
 };
 
-export const RESEARCH_TIERS = [
-  { tier: 1, name: 'Foundation', desc: 'Core life support recycling' },
-  { tier: 2, name: 'Life Support', desc: 'Oxygen efficiency and food recycling' },
-  { tier: 3, name: 'Food Production', desc: 'Hydroponic farming' },
-  { tier: 4, name: 'Power & Protection', desc: 'Solar optimization and radiation shielding' },
-  { tier: 5, name: 'Industrial', desc: 'In-situ material fabrication' },
-  { tier: 6, name: 'Advanced', desc: 'Medical advances and habitat expansion' },
-];
-
 export const RESEARCH_ORDER = [
-  'waterRecycling',
-  'highYieldElectrolysis', 'closedLoopLifeSupport',
-  'hydroponics',
-  'solarTracking', 'reinforcedShielding',
-  'fabrication',
-  'radiationMedicine', 'habitatExpansion'
+  'waterRecycling', 'hydroponics', 'fabrication',
+  'highYieldElectrolysis', 'reinforcedShielding', 'solarTracking',
+  'closedLoopLifeSupport', 'radiationMedicine', 'habitatExpansion'
 ];
 
 export const RESEARCH = researchDefs;

@@ -132,7 +132,7 @@
    ------------------------------------------------------------------------ */
 
 .research-status { padding: 6px 10px; border-radius: 9px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.03); font-size: 11.5px; color: var(--muted); font-weight: 600; }
-.research-grid { display: flex; flex-direction: column; gap: 24px; }
+.research-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 11px; }
 .research-card { display: flex; flex-direction: column; gap: 9px; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: rgba(255, 255, 255, 0.025); }
 .research-card.is-active { border-color: rgba(255, 194, 102, 0.35); background: rgba(255, 194, 102, 0.045); }
 .research-card.is-done { border-color: rgba(126, 224, 160, 0.3); background: rgba(126, 224, 160, 0.04); }
@@ -144,118 +144,6 @@
 .research-state.is-bad { color: var(--bad); }
 .research-progress { display: flex; flex-direction: column; gap: 4px; }
 .research-btn { margin-top: auto; }
-
-/* --------------------------------------------------------------------------
-   Research Tree
-   ------------------------------------------------------------------------ */
-
-.research-tier { 
-  background: rgba(255, 255, 255, 0.02); 
-  border: 1px solid var(--line); 
-  border-radius: var(--radius); 
-  padding: 16px; 
-  position: relative; 
-}
-
-.tier-header { 
-  display: flex; 
-  align-items: center; 
-  gap: 16px; 
-  margin-bottom: 16px; 
-  padding-bottom: 12px; 
-  border-bottom: 1px solid var(--line); 
-}
-
-.tier-number { 
-  display: flex; 
-  align-items: center; 
-  justify-content: center; 
-  width: 40px; 
-  height: 40px; 
-  border-radius: 50%; 
-  background: linear-gradient(135deg, var(--accent), var(--accent-2)); 
-  color: #07101c; 
-  font-weight: 800; 
-  font-size: 14px; 
-  flex-shrink: 0; 
-}
-
-.tier-info h3 { margin: 0; font-size: 16px; color: var(--text); }
-.tier-desc { margin: 4px 0 0; font-size: 11px; color: var(--muted); }
-
-.tier-nodes { 
-  display: flex; 
-  flex-wrap: wrap; 
-  gap: 16px; 
-  justify-content: center; 
-  padding: 8px 4px; 
-}
-
-.research-node { 
-  position: relative; 
-  width: 280px; 
-  background: var(--panel); 
-  border: 1px solid var(--line); 
-  border-radius: var(--radius-sm); 
-  padding: 12px; 
-  transition: border-color 0.15s ease, background 0.15s ease, box-shadow 0.15s ease; 
-}
-
-.research-node:hover { border-color: rgba(111, 183, 255, 0.3); box-shadow: 0 4px 16px rgba(0,0,0,0.2); }
-.research-node.is-done { border-color: rgba(126, 224, 160, 0.4); background: rgba(126, 224, 160, 0.05); }
-.research-node.is-active { border-color: rgba(255, 194, 102, 0.4); background: rgba(255, 194, 102, 0.05); }
-.research-node.is-locked { opacity: 0.6; }
-.research-node.is-locked:not(.is-active):not(.is-done) { filter: grayscale(0.3); }
-
-.research-node::before {
-  content: '';
-  position: absolute;
-  left: -24px;
-  top: 50%;
-  width: 24px;
-  height: 2px;
-  background: var(--line);
-  transform: translateY(-50%);
-  z-index: 1;
-}
-
-.research-node:first-child::before { display: none; }
-
-.research-node.has-prereq::after {
-  content: '';
-  position: absolute;
-  left: -36px;
-  top: 50%;
-  width: 36px;
-  height: 2px;
-  background: linear-gradient(90deg, var(--line), rgba(111,183,255,0.4));
-  transform: translateY(-50%);
-  z-index: 1;
-}
-
-.tier-connector { 
-  position: absolute; 
-  left: 50%; 
-  top: 100%; 
-  width: 2px; 
-  height: 40px; 
-  background: linear-gradient(180deg, var(--accent), transparent); 
-  transform: translateX(-50%); 
-  z-index: 1; 
-}
-
-.tier-connector::before {
-  content: '';
-  position: absolute;
-  bottom: 0;
-  left: 50%;
-  width: 0;
-  height: 0;
-  border-left: 6px solid transparent;
-  border-right: 6px solid transparent;
-  border-top: 8px solid var(--accent);
-  transform: translateX(-50%);
-}
 
 /* --------------------------------------------------------------------------
    Mission Cards

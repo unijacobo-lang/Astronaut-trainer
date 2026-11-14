@@ -39,27 +39,13 @@ if (!state) {
 
 const scene = (() => {
   try {
-    const canvas = document.getElementById('scene');
-    console.log('[main] Canvas element:', canvas);
-    if (!canvas) {
-      console.error('[main] Canvas element not found!');
-      return { draw() {} };
-    }
-    const scene = createScene(canvas);
-    console.log('[main] Scene created successfully');
-    return scene;
+    return createScene(document.getElementById('scene'));
   } catch (error) {
     // The base view is decorative; never let it stop the game loop.
-    console.error('[main] Base view error:', error);
+    console.warn('Base view unavailable:', error);
     return { draw() {} };
   }
 })();
-
-console.log('[main] Initial state:', state);
-console.log('[main] State keys:', Object.keys(state));
-console.log('[main] State resources:', state.resources);
-console.log('[main] State crew:', state.crew);
-console.log('[main] State buildings:', state.buildings);
 
 const ui = buildUI(state, {
   onBuild(id) {
