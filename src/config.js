@@ -94,14 +94,6 @@ export const BALANCE = {
   stormPeakMin: 1500,
   stormPeakMax: 8000,
 
-  /** Shield integrity. Tuned so a quiet month costs ~20%, a big storm ~12-18%. */
-  shieldDecayPerRadiation: 0.0001,
-  shieldDanger: 50,
-  shieldCritical: 25,
-  shieldRepairAmount: 25,
-  shieldRepairMaterials: 220,
-  shieldRepairCrew: 1,
-
   /** Radiation exposure while unsheltered. */
   illnessChancePerCrewHour: 0.00015,
   deathChancePerCrewHour: 0.00008,

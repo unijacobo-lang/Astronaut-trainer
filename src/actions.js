@@ -87,37 +87,7 @@ export function repair(state, id) {
 }
 
 /* --------------------------------------------------------------------------
- * Radiation shield
- * ------------------------------------------------------------------------ */
-
-export function reinforceShield(state) {
-  const blocked = guard(state);
-  if (blocked) return blocked;
-
-  if (state.shield >= 100) return { ok: false, reason: 'The radiation shield is already at full strength.' };
-  if (state.tasks.some((task) => task.kind === 'shield')) {
-    return { ok: false, reason: 'Shield reinforcement is already underway.' };
-  }
-  if (idleCrew(state) < BALANCE.shieldRepairCrew) {
-    return { ok: false, reason: 'No idle astronaut available.' };
-  }
-  if ((state.resources.materials ?? 0) < BALANCE.shieldRepairMaterials) {
-    return { ok: false, reason: `Shield work needs ${BALANCE.shieldRepairMaterials} materials.` };
-  }
-
-  spend(state, { materials: BALANCE.shieldRepairMaterials });
-  state.tasks.push({
-    kind: 'shield',
-    id: 'shield',
-    hoursLeft: BALANCE.repairHours,
-    hoursTotal: BALANCE.repairHours,
-    crew: BALANCE.shieldRepairCrew,
-  });
-  log(state, 'Shield reinforcement team dispatched.', 'info');
-  return { ok: true };
-}
-
-/* --------------------------------------------------------------------------
+ * /* --------------------------------------------------------------------------\n * Research\n * ------------------------------------------------------------------------ *//* --------------------------------------------------------------------------
  * Research
  * ------------------------------------------------------------------------ */
 

@@ -55,7 +55,7 @@ export function createInitialState() {
     },
 
     radiation: { level: BALANCE.radiationBase, stormHours: 0, stormTotal: 0, peak: 0 },
-    shield: 100,
+    
     fundingNextHour: BALANCE.fundingIntervalHours,
     crowdingHours: 0,
 

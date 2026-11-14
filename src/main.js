@@ -12,7 +12,7 @@ import { step } from './simulation.js';
 import {
   build,
   repair,
-  reinforceShield,
+  
   startResearch,
   launchMission,
   buyResource,
@@ -60,11 +60,6 @@ const ui = buildUI(state, {
     render(state, ui);
   },
 
-  onReinforce() {
-    const result = reinforceShield(state);
-    if (!result.ok) log(state, result.reason, 'warn');
-    render(state, ui);
-  },
 
   onResearch(id) {
     const result = startResearch(state, id);
