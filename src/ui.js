@@ -142,10 +142,13 @@ export function buildUI(state, handlers) {
       <span class="res-sub" data-sub></span>
     `;
     resourceBar.append(el);
+    const valueEl = el.querySelector('[data-value]');
+    const subEl = el.querySelector('[data-sub]');
+    console.log(`[buildUI] Created resource chip for ${def.key}:`, { valueEl, subEl });
     resourceRefs[def.key] = {
       root: el,
-      value: el.querySelector('[data-value]'),
-      sub: el.querySelector('[data-sub]'),
+      value: valueEl,
+      sub: subEl,
     };
   }
 
@@ -507,6 +510,15 @@ export function buildUI(state, handlers) {
  * ------------------------------------------------------------------------ */
 
 export function render(state, ui) {
+  console.log('[render] Called with state:', { 
+    hour: state.hour, 
+    resources: state.resources, 
+    crew: state.crew,
+    buildings: state.buildings,
+    shield: state.shield,
+    radiation: state.radiation
+  });
+  
   const rates = getRates(state);
   const atmosphere = atmospherePercent(state);
   const efficiency = atmosphereEfficiency(state);
@@ -515,6 +527,8 @@ export function render(state, ui) {
   const idle = idleCrew(state);
   const berths = crewCapacity(state);
   const sheltered = shelteredCrew(state);
+
+  console.log('[render] Computed values:', { atmosphere, capacity, idle, berths, sheltered, efficiency });
 
   /* Resource chips -------------------------------------------------------- */
   const chips = ui.resourceRefs;

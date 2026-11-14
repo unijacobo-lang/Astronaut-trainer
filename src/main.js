@@ -55,6 +55,12 @@ const scene = (() => {
   }
 })();
 
+console.log('[main] Initial state:', state);
+console.log('[main] State keys:', Object.keys(state));
+console.log('[main] State resources:', state.resources);
+console.log('[main] State crew:', state.crew);
+console.log('[main] State buildings:', state.buildings);
+
 const ui = buildUI(state, {
   onBuild(id) {
     const result = build(state, id);
