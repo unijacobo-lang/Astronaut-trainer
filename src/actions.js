@@ -138,11 +138,9 @@ export function startResearch(state, id) {
 
   const idle = idleCrew(state);
   if (idle < def.crew) {
-    console.debug('[startResearch] Not enough idle crew:', { idle, needed: def.crew, total: state.crew.total, ill: state.crew.ill, sheltered: state.crew.sheltered });
     return { ok: false, reason: `Needs ${def.crew} idle astronaut${def.crew === 1 ? '' : 's'}.` };
   }
   if (!canAfford(state, def.cost)) {
-    console.debug('[startResearch] Cannot afford:', { cost: def.cost, resources: state.resources });
     return { ok: false, reason: `Not enough resources: ${missingText(state, def.cost)}.` };
   }
 

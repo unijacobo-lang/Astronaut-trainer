@@ -67,9 +67,7 @@ const ui = buildUI(state, {
   },
 
   onResearch(id) {
-    console.debug('[onResearch] click:', id);
     const result = startResearch(state, id);
-    console.debug('[onResearch] result:', result);
     if (!result.ok) log(state, result.reason, 'warn');
     render(state, ui);
   },

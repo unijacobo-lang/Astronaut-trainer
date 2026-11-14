@@ -811,15 +811,6 @@ function renderStructures(state, ui, idle) {
  * ------------------------------------------------------------------------ */
 
 function renderResearch(state, ui, idle) {
-  console.debug('[renderResearch] state:', { 
-    lab: state.buildings.lab, 
-    idle, 
-    active: state.research.active, 
-    done: state.research.done,
-    crew: { total: state.crew.total, ill: state.crew.ill, sheltered: state.crew.sheltered },
-    resources: state.resources 
-  });
-  
   const active = state.research.active;
   ui.researchStatus.textContent = active
     ? `${RESEARCH[active.id]?.name ?? active.id} · ${formatDuration(active.hoursLeft)} left · ${Math.round(active.chance * 100)}% base success`
