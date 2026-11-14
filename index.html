@@ -1,0 +1,150 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta name="description" content="Lunar Outpost — a lunar base management simulation. Build, research and survive on the Moon." />
+  <meta name="theme-color" content="#080b12" />
+  <title>Lunar Outpost — Base Management</title>
+  <link rel="icon" type="image/svg+xml" href="./public/favicon.svg" />
+  <link rel="stylesheet" href="./src/styles/main.css" />
+</head>
+<body>
+  <div class="app">
+    <header class="topbar">
+      <div class="brand">
+        <span class="brand-mark" aria-hidden="true">☾</span>
+        <div>
+          <h1>Lunar Outpost</h1>
+          <p id="brand-sub">base management · year 1</p>
+        </div>
+      </div>
+
+      <div id="resource-bar" class="resource-bar" aria-label="Base status"></div>
+
+      <div class="controls">
+        <button id="btn-pause" class="btn" type="button" title="Pause (Space)">Pause</button>
+        <div class="speed" role="group" aria-label="Game speed">
+          <button class="btn speed-btn is-active" type="button" data-speed="1" title="1× — 6 hours per second">1×</button>
+          <button class="btn speed-btn" type="button" data-speed="2" title="2× — 12 hours per second">2×</button>
+          <button class="btn speed-btn" type="button" data-speed="4" title="4× — 24 hours per second">4×</button>
+        </div>
+        <button id="btn-reset" class="btn btn-ghost" type="button">New base</button>
+      </div>
+    </header>
+
+    <nav class="tabbar" id="tabbar" role="tablist" aria-label="Sections">
+      <button class="tab is-active" type="button" role="tab" aria-selected="true" data-tab="base">Base</button>
+      <button class="tab" type="button" role="tab" aria-selected="false" data-tab="research">
+        Research <span class="tab-badge" id="badge-research" hidden></span>
+      </button>
+      <button class="tab" type="button" role="tab" aria-selected="false" data-tab="missions">
+        Missions <span class="tab-badge" id="badge-missions" hidden></span>
+      </button>
+      <button class="tab" type="button" role="tab" aria-selected="false" data-tab="crew">Crew</button>
+    </nav>
+
+    <main class="layout">
+      <div class="main-col">
+        <section class="panel panel-scene" data-panel="base">
+          <div class="scene-wrap">
+            <canvas id="scene" class="scene" width="960" height="400" role="img" aria-label="Live view of the lunar base"></canvas>
+            <div class="scene-hud" aria-hidden="true">
+              <span class="scene-chip" id="hud-o2">O₂ 21.0%</span>
+              <span class="scene-chip" id="hud-power">⚡ 18 / 14 kW</span>
+              <span class="scene-chip" id="hud-rad">☢ 260 µSv/h</span>
+            </div>
+            <div id="alerts" class="alerts" aria-live="polite"></div>
+          </div>
+        </section>
+
+        <section class="panel" data-panel="base">
+          <div class="panel-head">
+            <div>
+              <h2>Construction</h2>
+              <p class="panel-sub">Buildings cost money, materials and an idle astronaut. Construction takes simulated hours.</p>
+            </div>
+            <div id="stats" class="stats" aria-label="Base summary"></div>
+          </div>
+          <div id="buildings" class="building-grid"></div>
+        </section>
+
+        <div class="split" data-panel="base">
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Structures</h2>
+              <span class="panel-sub" id="structure-count"></span>
+            </div>
+            <div id="structures" class="structure-list"></div>
+          </section>
+
+          <section class="panel">
+            <div class="panel-head">
+              <h2>Earth Imports</h2>
+            </div>
+            <p class="panel-sub">Every kilogram launched from Earth is expensive. Imports include a flat launch fee.</p>
+            <div id="imports" class="import-grid"></div>
+          </section>
+        </div>
+
+        <section class="panel" data-panel="research" hidden>
+          <div class="panel-head">
+            <div>
+              <h2>Research</h2>
+              <p class="panel-sub">The lab runs one project at a time. A failed project loses every invested resource.</p>
+            </div>
+            <div id="research-status" class="research-status"></div>
+          </div>
+          <div id="research" class="research-grid"></div>
+        </section>
+
+        <section class="panel" data-panel="missions" hidden>
+          <div class="panel-head">
+            <div>
+              <h2>Missions</h2>
+              <p class="panel-sub">One mission per year. Failing a mission ends the run; success brings supplies, funds, crew or research bonuses.</p>
+            </div>
+          </div>
+          <div id="mission" class="mission"></div>
+          <div id="mission-history" class="history"></div>
+        </section>
+
+        <section class="panel" data-panel="crew" hidden>
+          <div class="panel-head">
+            <div>
+              <h2>Crew</h2>
+              <p class="panel-sub">Astronauts are never consumed by a task — they are only occupied until it finishes.</p>
+            </div>
+          </div>
+          <div id="crew" class="crew"></div>
+        </section>
+      </div>
+
+      <aside class="panel panel-log">
+        <div class="panel-head">
+          <h2>Log</h2>
+          <span class="panel-sub" id="clock">Y1 · D1 · 00:00</span>
+        </div>
+        <ul id="log" class="log" aria-live="polite"></ul>
+      </aside>
+    </main>
+
+    <footer class="footer">
+      <span>Space — pause &nbsp;·&nbsp; 1 / 2 / 4 — speed &nbsp;·&nbsp; tabs: Base / Research / Missions / Crew</span>
+      <span id="save-status" class="save-status">autosaving</span>
+    </footer>
+  </div>
+
+  <div id="overlay" class="overlay" hidden>
+    <div class="overlay-card" role="dialog" aria-modal="true" aria-labelledby="overlay-title">
+      <p class="overlay-kicker">Mission lost</p>
+      <h2 id="overlay-title">The base is lost</h2>
+      <p id="overlay-reason" class="overlay-reason"></p>
+      <dl id="overlay-stats" class="overlay-stats"></dl>
+      <button id="overlay-restart" class="btn btn-primary" type="button">Start a new base</button>
+    </div>
+  </div>
+
+  <script type="module" src="./src/main.js"></script>
+</body>
+</html>

@@ -1,0 +1,160 @@
+/* ==========================================================================
+   Component Styles - Lunar Outpost
+   ========================================================================== */
+
+/* --------------------------------------------------------------------------
+   Building Cards
+   ------------------------------------------------------------------------ */
+
+.card {
+  display: flex;
+  flex-direction: column;
+  gap: 9px;
+  padding: 12px;
+  border-radius: var(--radius-sm);
+  border: 1px solid var(--line);
+  background: rgba(255, 255, 255, 0.025);
+  transition: border-color 0.15s ease, background 0.15s ease;
+}
+
+.card:hover { border-color: rgba(111, 183, 255, 0.28); background: rgba(111, 183, 255, 0.045); }
+.card.is-owned { border-color: rgba(126, 224, 160, 0.22); }
+.card.is-locked { border-color: rgba(255, 194, 102, 0.22); background: rgba(255, 194, 102, 0.03); }
+
+.card-head { display: flex; align-items: flex-start; gap: 9px; }
+.card-icon {
+  display: grid; place-items: center; width: 34px; height: 34px; flex: 0 0 auto;
+  border-radius: 9px; font-size: 18px; background: rgba(111, 183, 255, 0.1); border: 1px solid rgba(111, 183, 255, 0.18);
+}
+.card-titles { min-width: 0; flex: 1; }
+.card-titles h3 { font-size: 13.5px; line-height: 1.2; }
+.blurb { margin-top: 2px; font-size: 11px; color: var(--muted); }
+.count { font-size: 11px; font-weight: 700; color: var(--accent-2); white-space: nowrap; }
+
+.effects, .cost, .research-meta, .mission-meta { display: flex; flex-wrap: wrap; gap: 5px; }
+
+.chip {
+  display: inline-flex; align-items: center; gap: 3px; padding: 3px 7px;
+  border-radius: 999px; font-size: 10.5px; color: #c8d6e6;
+  background: rgba(255, 255, 255, 0.05); border: 1px solid rgba(170, 196, 224, 0.12); white-space: nowrap;
+}
+
+.cost-chip { color: #d8c8a8; background: rgba(232, 207, 138, 0.07); border-color: rgba(232, 207, 138, 0.18); }
+.cost-chip.is-missing { color: #ffb4b4; background: rgba(255, 122, 122, 0.1); border-color: rgba(255, 122, 122, 0.34); }
+
+.card-progress { display: flex; flex-direction: column; gap: 4px; }
+.card-progress-text, .research-progress-text { font-size: 10.5px; color: var(--muted); }
+.card-note { padding: 5px 8px; border-radius: 7px; font-size: 10.5px; color: var(--warn); background: rgba(255, 194, 102, 0.07); border: 1px solid rgba(255, 194, 102, 0.2); }
+
+.card-foot { display: flex; align-items: flex-end; justify-content: space-between; gap: 10px; margin-top: auto; padding-top: 3px; }
+.card-foot .cost { flex: 1; }
+.build-btn { flex: 0 0 auto; }
+
+.bar { height: 7px; border-radius: 999px; background: rgba(255, 255, 255, 0.08); overflow: hidden; }
+.bar > span { display: block; height: 100%; width: 0; border-radius: inherit; background: linear-gradient(90deg, #5fa8ef, #8be0b0); transition: width 0.18s linear; }
+.bar > span.is-good { background: linear-gradient(90deg, #4fbf7b, #8be0b0); }
+.bar > span.is-warn { background: linear-gradient(90deg, #d99a3e, #ffc266); }
+.bar > span.is-bad { background: linear-gradient(90deg, #c94d4d, #ff7a7a); }
+
+/* --------------------------------------------------------------------------
+   Structure List
+   ------------------------------------------------------------------------ */
+
+.structure-list { display: flex; flex-direction: column; gap: 7px; }
+.structure-row { display: flex; align-items: center; gap: 10px; padding: 8px 9px; border-radius: 9px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.025); }
+.structure-row:hover { background: rgba(255, 255, 255, 0.045); }
+.structure-icon { display: grid; place-items: center; width: 30px; height: 30px; flex: 0 0 auto; border-radius: 8px; font-size: 15px; background: rgba(255, 255, 255, 0.05); }
+.structure-main { flex: 1; min-width: 0; display: flex; flex-direction: column; gap: 4px; }
+.structure-title { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 12px; }
+.structure-title strong { font-weight: 650; }
+.structure-value { flex: 0 0 auto; font-size: 11px; font-weight: 700; min-width: 38px; text-align: right; color: var(--muted); }
+.structure-value.is-good { color: var(--good); }
+.structure-value.is-warn { color: var(--warn); }
+.structure-value.is-bad { color: var(--bad); }
+.structure-shield { border-color: rgba(111, 183, 255, 0.25); background: rgba(111, 183, 255, 0.05); }
+
+/* --------------------------------------------------------------------------
+   Import Cards
+   ------------------------------------------------------------------------ */
+
+.import-grid { display: grid; gap: 9px; }
+.import-card { display: flex; flex-direction: column; gap: 8px; padding: 10px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: rgba(255, 255, 255, 0.025); }
+.import-head { display: flex; align-items: flex-start; gap: 9px; }
+.import-icon { display: grid; place-items: center; width: 30px; height: 30px; flex: 0 0 auto; border-radius: 8px; font-size: 16px; background: rgba(232, 207, 138, 0.08); border: 1px solid rgba(232, 207, 138, 0.16); }
+.import-head h3 { font-size: 12.5px; }
+.import-price { display: flex; align-items: baseline; justify-content: space-between; gap: 8px; font-size: 12px; font-weight: 700; color: var(--gold); }
+.muted { color: var(--muted); font-size: 10px; font-weight: 500; }
+
+/* --------------------------------------------------------------------------
+   Research Cards
+   ------------------------------------------------------------------------ */
+
+.research-status { padding: 6px 10px; border-radius: 9px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.03); font-size: 11.5px; color: var(--muted); font-weight: 600; }
+.research-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(290px, 1fr)); gap: 11px; }
+.research-card { display: flex; flex-direction: column; gap: 9px; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: rgba(255, 255, 255, 0.025); }
+.research-card.is-active { border-color: rgba(255, 194, 102, 0.35); background: rgba(255, 194, 102, 0.045); }
+.research-card.is-done { border-color: rgba(126, 224, 160, 0.3); background: rgba(126, 224, 160, 0.04); }
+.research-card.is-locked { opacity: 0.72; }
+.research-head { display: flex; align-items: flex-start; gap: 9px; }
+.research-state { font-size: 10px; font-weight: 750; letter-spacing: 0.04em; text-transform: uppercase; color: var(--muted); white-space: nowrap; }
+.research-state.is-good { color: var(--good); }
+.research-state.is-warn { color: var(--warn); }
+.research-state.is-bad { color: var(--bad); }
+.research-progress { display: flex; flex-direction: column; gap: 4px; }
+.research-btn { margin-top: auto; }
+
+/* --------------------------------------------------------------------------
+   Mission Cards
+   ------------------------------------------------------------------------ */
+
+.mission { display: flex; flex-direction: column; gap: 12px; }
+.mission-empty { padding: 22px; border-radius: var(--radius-sm); border: 1px dashed var(--line-strong); background: rgba(255, 255, 255, 0.02); text-align: center; }
+.mission-kicker { font-size: 10px; font-weight: 750; letter-spacing: 0.14em; text-transform: uppercase; color: var(--muted); }
+.mission-empty h3 { margin: 4px 0 6px; font-size: 16px; }
+.mission-card { padding: 15px; border-radius: var(--radius-sm); border: 1px solid rgba(232, 207, 138, 0.3); background: linear-gradient(150deg, rgba(232, 207, 138, 0.09), rgba(255, 255, 255, 0.02) 55%); }
+.mission-top { display: flex; align-items: center; gap: 9px; flex-wrap: wrap; }
+.mission-type { padding: 3px 8px; border-radius: 999px; font-size: 9.5px; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: #1a1306; background: var(--gold); }
+.mission-top h3 { font-size: 17px; }
+.mission-brief { margin: 7px 0 10px; color: #c8d4e2; font-size: 12.5px; max-width: 80ch; }
+.mission-chance { display: flex; align-items: baseline; justify-content: space-between; gap: 12px; margin: 10px 0 6px; padding: 8px 10px; border-radius: 8px; background: rgba(0, 0, 0, 0.22); border: 1px solid var(--line); font-size: 11.5px; color: var(--muted); }
+.mission-chance strong { font-size: 18px; }
+.mission-chance strong.is-good { color: var(--good); }
+.mission-chance strong.is-warn { color: var(--warn); }
+.mission-chance strong.is-bad { color: var(--bad); }
+.mission-reward { margin: 8px 0; font-size: 11.5px; color: #d9e4f0; }
+.mission-reward span { color: var(--gold); font-weight: 700; margin-right: 5px; }
+.mission-bar { margin: 10px 0; }
+.mission-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-top: 10px; }
+.mission-hint { font-size: 10.5px; color: var(--muted); }
+
+.history { margin-top: 16px; }
+.history h3 { font-size: 12px; letter-spacing: 0.05em; text-transform: uppercase; color: var(--muted); margin-bottom: 7px; }
+.history-list { list-style: none; margin: 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.history-item { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 10px; align-items: center; padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.025); font-size: 11.5px; }
+.history-item span:nth-child(2) { color: var(--muted); font-size: 10.5px; }
+.history-item strong { font-size: 10px; letter-spacing: 0.06em; text-transform: uppercase; }
+.history-item.is-good strong { color: var(--good); }
+.history-item.is-bad strong { color: var(--bad); }
+
+/* --------------------------------------------------------------------------
+   Crew Panel
+   ------------------------------------------------------------------------ */
+
+.crew { display: flex; flex-direction: column; gap: 14px; }
+.crew-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(110px, 1fr)); gap: 8px; }
+.crew-stat { display: flex; flex-direction: column; gap: 2px; padding: 10px; border-radius: 9px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.03); }
+.crew-stat span { font-size: 9.5px; letter-spacing: 0.08em; text-transform: uppercase; color: var(--muted); }
+.crew-stat strong { font-size: 19px; line-height: 1.1; }
+
+.shelter-card { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px; border-radius: var(--radius-sm); border: 1px solid rgba(111, 183, 255, 0.25); background: rgba(111, 183, 255, 0.05); }
+.shelter-card h3, .assignments h3, .radiation-card h3 { font-size: 12.5px; margin-bottom: 3px; }
+.assignments ul { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
+.assignment { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.025); font-size: 11.5px; }
+.assignment span:last-child { color: var(--muted); font-size: 10.5px; white-space: nowrap; }
+.assignment-empty { padding: 10px; border-radius: 8px; border: 1px dashed var(--line-strong); color: var(--muted); font-size: 11.5px; }
+
+.radiation-card { padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--line); background: rgba(255, 255, 255, 0.025); }
+.radiation-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(130px, 1fr)); gap: 8px; margin-top: 8px; }
+.radiation-grid div { display: flex; flex-direction: column; gap: 2px; padding: 8px; border-radius: 8px; background: rgba(0, 0, 0, 0.18); }
+.radiation-grid span { font-size: 9.5px; letter-spacing: 0.06em; text-transform: uppercase; color: var(--muted); }
+.radiation-grid strong { font-size: 13px; }
