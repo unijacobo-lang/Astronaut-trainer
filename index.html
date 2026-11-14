@@ -41,6 +41,7 @@
       <button class="tab" type="button" role="tab" aria-selected="false" data-tab="missions">
         Missions <span class="tab-badge" id="badge-missions" hidden></span>
       </button>
+      <button class="tab" type="button" role="tab" aria-selected="false" data-tab="maintenance">Maintenance</button>
       <button class="tab" type="button" role="tab" aria-selected="false" data-tab="crew">Crew</button>
     </nav>
 
@@ -72,20 +73,28 @@
         <div class="split" data-panel="base">
           <section class="panel">
             <div class="panel-head">
-              <h2>Structures</h2>
-              <span class="panel-sub" id="structure-count"></span>
-            </div>
-            <div id="structures" class="structure-list"></div>
-          </section>
-
-          <section class="panel">
-            <div class="panel-head">
               <h2>Earth Imports</h2>
             </div>
             <p class="panel-sub">Every kilogram launched from Earth is expensive. Imports include a flat launch fee.</p>
             <div id="imports" class="import-grid"></div>
           </section>
         </div>
+
+        <section class="panel" data-panel="maintenance" hidden>
+          <div class="panel-head">
+            <h2>Maintenance & Structures</h2>
+            <span class="panel-sub" id="structure-count"></span>
+          </div>
+          <div id="structures" class="structure-list"></div>
+          <div class="panel-head" style="margin-top: 16px;">
+            <h2>Radiation Shield</h2>
+          </div>
+          <div id="shield-maintenance" class="structure-list"></div>
+          <div class="panel-head" style="margin-top: 16px;">
+            <h2>Crew Health</h2>
+          </div>
+          <div id="health-maintenance" class="structure-list"></div>
+        </section>
 
         <section class="panel" data-panel="research" hidden>
           <div class="panel-head">
@@ -130,7 +139,7 @@
     </main>
 
     <footer class="footer">
-      <span>Space — pause &nbsp;·&nbsp; 1 / 2 / 4 — speed &nbsp;·&nbsp; tabs: Base / Research / Missions / Crew</span>
+      <span>Space — pause &nbsp;·&nbsp; 1 / 2 / 4 — speed &nbsp;·&nbsp; tabs: Base / Research / Missions / Maintenance / Crew</span>
       <span id="save-status" class="save-status">autosaving</span>
     </footer>
   </div>
