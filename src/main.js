@@ -43,7 +43,7 @@ const scene = (() => {
   } catch (error) {
     // The base view is decorative; never let it stop the game loop.
     console.warn('Base view unavailable:', error);
-    return { draw() {} };
+    return { draw() {}, setZoom() {}, getZoom() { return 1; }, resetView() {} };
   }
 })();
 
@@ -111,11 +111,15 @@ const ui = buildUI(state, {
     ui.missionSignature = '';
     ui.alertsSignature = '';
     ui.setTab('base');
+    scene.resetView();
     render(state, ui);
     scene.draw(state, 0);
   },
 });
-
+ 
+// Add scene reference to ui for zoom controls
+ui.scene = scene;
+ 
 /* --------------------------------------------------------------------------
  * Loop
  * ------------------------------------------------------------------------ */

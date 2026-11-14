@@ -13,7 +13,7 @@ const W = 960;
 const H = 400;
 const HORIZON = 214;
 const PIXEL = 3;
-const MAX_BUILDING_SPRITES = 10;
+const MAX_BUILDING_SPRITES = 20; // Increased from 10
 const MAX_ASTRONAUT_SPRITES = 16;
 
 /** Small deterministic PRNG so the base looks the same every reload. */
@@ -225,10 +225,35 @@ function buildSprites() {
     }),
   );
 
-  return { habitat, solar, battery, oxygenGenerator, waterReclaimer, greenhouse, fabricator, lab, shelter, astronautFrames };
+  /* Shelter interior frame - astronauts sitting in shelter */
+  const shelterFrames = [0, 1].map((frame) =>
+    sprite(6, 11, (p) => {
+      // Helmet
+      p(1, 0, 4, 1, '#cfd7e0');
+      p(1, 1, 4, 3, '#eef3f8');
+      p(2, 2, 2, 1, '#3b7ea8');
+      p(2, 2, 1, 1, '#8fdcff');
+      // Body sitting
+      p(1, 4, 4, 4, '#dde5ee');
+      p(0, 5, 1, 2, '#dde5ee');
+      p(5, 5, 1, 2, '#dde5ee');
+      p(1, 4, 4, 1, '#b9c3ce');
+      p(2, 4, 2, 2, '#95a2b0');
+      // Sitting legs
+      if (frame === 0) {
+        p(1, 8, 1, 2, '#b9c3ce');
+        p(4, 8, 1, 2, '#b9c3ce');
+      } else {
+        p(2, 8, 1, 2, '#b9c3ce');
+        p(3, 8, 1, 2, '#b9c3ce');
+      }
+    }),
+  );
+
+  return { habitat, solar, battery, oxygenGenerator, waterReclaimer, greenhouse, fabricator, lab, shelter, astronautFrames, shelterFrames };
 }
 
-/** Where structures can stand. Ordered back to front for depth. */
+/** Where structures can stand. Ordered back to front for depth. More slots! */
 const SLOTS = [
   { x: 128, y: 272 },
   { x: 382, y: 266 },
@@ -240,6 +265,27 @@ const SLOTS = [
   { x: 168, y: 372 },
   { x: 450, y: 368 },
   { x: 726, y: 374 },
+  // Additional slots for expanded base
+  { x: 100, y: 240 },
+  { x: 320, y: 235 },
+  { x: 560, y: 240 },
+  { x: 800, y: 235 },
+  { x: 200, y: 340 },
+  { x: 480, y: 335 },
+  { x: 760, y: 340 },
+  { x: 140, y: 395 },
+  { x: 420, y: 390 },
+  { x: 700, y: 395 },
+];
+
+/** Shelter interior positions - astronauts sit in shelter during storms */
+const SHELTER_POSITIONS = [
+  { x: 280, y: 310 },
+  { x: 320, y: 310 },
+  { x: 360, y: 310 },
+  { x: 400, y: 310 },
+  { x: 440, y: 310 },
+  { x: 480, y: 310 },
 ];
 
 /** Paint the static lunar background once. */
@@ -424,10 +470,10 @@ function paintBackground(random) {
 /**
  * Create the scene renderer for a canvas element.
  * @param {HTMLCanvasElement} canvas
- * @returns {{draw: (state: object, dt?: number) => void}}
+ * @returns {{draw: (state: object, dt?: number) => void, setZoom: (zoom: number) => void, setPan: (x: number, y: number) => void}}
  */
 export function createScene(canvas) {
-  if (!canvas) return { draw() {} };
+  if (!canvas) return { draw() {}, setZoom() {}, setPan() {} };
 
   const ctx = canvas.getContext('2d');
   const dpr = Math.min(2, window.devicePixelRatio || 1);
@@ -452,11 +498,21 @@ export function createScene(canvas) {
   }
 
   let clock = 0;
+  let zoom = 1;
+  let panX = 0;
+  let panY = 0;
+  const minZoom = 0.5;
+  const maxZoom = 3;
 
   return {
     /** Advance the decorative clock and repaint. dt is real seconds. */
     draw(state, dt = 0) {
       if (!state.paused) clock += dt * (state.speed ?? 1);
+
+      // Apply zoom and pan
+      ctx.save();
+      ctx.setTransform(dpr * zoom, 0, 0, dpr * zoom, dpr * panX, dpr * panY);
+      ctx.imageSmoothingEnabled = false;
 
       ctx.drawImage(background, 0, 0, W, H);
 
@@ -490,7 +546,13 @@ export function createScene(canvas) {
       const crewCount = Math.min(state.crew?.total ?? 0, MAX_ASTRONAUT_SPRITES);
       const anchors = occupied.slice(0, drawn).map((_, i) => SLOTS[i]);
 
-      for (let i = 0; i < crewCount; i += 1) {
+      // Check if crew is sheltered
+      const isSheltered = state.crew?.sheltered === true;
+      const shelteredCount = isSheltered ? Math.min(state.crew?.total ?? 0, 6) : 0;
+      const walkingCount = crewCount - shelteredCount;
+
+      // Walking astronauts (not sheltered)
+      for (let i = 0; i < walkingCount; i += 1) {
         const walker = walkers[i];
         let from;
         let to;
@@ -523,6 +585,24 @@ export function createScene(canvas) {
         items.push({ y, kind: 'astronaut', x, yPos: y + bob, facing, frame, scale: walker.scale });
       }
 
+      // Sheltered astronauts - sitting in shelter
+      if (isSheltered && shelteredCount > 0) {
+        for (let i = 0; i < shelteredCount; i += 1) {
+          const pos = SHELTER_POSITIONS[i % SHELTER_POSITIONS.length];
+          const frame = Math.floor(clock * 2) % 2; // Slow sitting animation
+          items.push({ 
+            y: pos.y, 
+            kind: 'astronaut', 
+            x: pos.x, 
+            yPos: pos.y, 
+            facing: 1, 
+            frame, 
+            scale: 0.8,
+            sheltered: true 
+          });
+        }
+      }
+
       items.sort((a, b) => a.y - b.y);
 
       for (const item of items) {
@@ -552,15 +632,17 @@ export function createScene(canvas) {
             ctx.fill();
           }
         } else {
-          const frame = sprites.astronautFrames[item.frame];
+          const frame = item.sheltered ? sprites.shelterFrames[item.frame] : sprites.astronautFrames[item.frame];
           const s = PIXEL * 0.78 * item.scale;
           const w = frame.width * s;
           const h = frame.height * s;
 
-          ctx.fillStyle = 'rgba(0, 0, 0, 0.32)';
-          ctx.beginPath();
-          ctx.ellipse(item.x, item.yPos + 1, w * 0.55, 3, 0, 0, Math.PI * 2);
-          ctx.fill();
+          if (!item.sheltered) {
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.32)';
+            ctx.beginPath();
+            ctx.ellipse(item.x, item.yPos + 1, w * 0.55, 3, 0, 0, Math.PI * 2);
+            ctx.fill();
+          }
 
           ctx.save();
           ctx.translate(item.x, item.yPos);
@@ -594,7 +676,37 @@ export function createScene(canvas) {
         ctx.fillStyle = 'rgba(255, 150, 130, 0.92)';
         ctx.fillText('SOLAR STORM', 16, 24);
       }
+      // Show shelter status
+      if (state.crew?.sheltered) {
+        const sheltered = Math.min(state.crew.total, 6);
+        ctx.fillStyle = 'rgba(126, 224, 160, 0.9)';
+        ctx.fillText(`\u{1F6E1} ${sheltered}/${state.crew.total} sheltered`, 16, 40);
+      }
       ctx.textAlign = 'left';
+      ctx.restore();
+    },
+
+    /** Set zoom level (0.5 to 3) */
+    setZoom(z) {
+      zoom = Math.max(minZoom, Math.min(maxZoom, z));
+    },
+
+    /** Pan the view */
+    setPan(x, y) {
+      panX = x;
+      panY = y;
+    },
+
+    /** Get current zoom */
+    getZoom() {
+      return zoom;
+    },
+
+    /** Reset view */
+    resetView() {
+      zoom = 1;
+      panX = 0;
+      panY = 0;
     },
   };
 }

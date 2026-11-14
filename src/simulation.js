@@ -75,9 +75,13 @@ export function step(state, rand = Math.random) {
 
   const labor = atmosphereEfficiency(state);
 
-  applyTasks(state, labor);
-  applyResearch(state, rand, labor);
-  applyMissions(state, rand);
+  // When sheltered, no work happens (construction, repairs, research)
+  // But missions still tick down
+  if (!state.crew.sheltered) {
+    applyTasks(state, labor);
+    applyResearch(state, rand, labor);
+  }
+  applyMissions(state, rand); // Missions always tick
   applyFunding(state, rand);
   applyRadiationSickness(state, rand);
   applyConditions(state, rand);
@@ -238,7 +242,7 @@ function completeTask(state, task) {
 }
 
 /* --------------------------------------------------------------------------
- * Research resolution
+ * Research resolution - now with failure chance
  * ------------------------------------------------------------------------ */
 
 function applyResearch(state, rand, labor) {
@@ -254,7 +258,16 @@ function applyResearch(state, rand, labor) {
   active.hoursLeft -= labor;
   if (active.hoursLeft > 0) return;
 
-  const chance = clamp(active.chance + state.research.bonus + (labor - 1) * 0.2, 0.05, 0.98);
+  // Research success chance modified by conditions and research bonus
+  const baseChance = active.chance;
+  const efficiency = atmosphereEfficiency(state);
+  const labCondition = conditionOf(state, 'lab');
+  
+  // Calculate final chance: base + research bonus + efficiency modifier + lab condition modifier
+  // Clamped between min and max from BALANCE
+  let chance = baseChance + state.research.bonus + (efficiency - 1) * 0.15 + (labCondition - 100) * 0.001;
+  chance = clamp(chance, BALANCE.researchMinChance, BALANCE.researchMaxChance);
+  
   const success = rand() < chance;
   const def = RESEARCH[active.id];
   state.research.active = null;
@@ -274,7 +287,7 @@ function applyResearch(state, rand, labor) {
 }
 
 /* --------------------------------------------------------------------------
- * Missions
+ * Missions - Deterministic success based on conditions
  * ------------------------------------------------------------------------ */
 
 function applyMissions(state, rand) {
@@ -328,6 +341,7 @@ function spawnMission(state) {
 }
 
 function scheduleNextMission(state) {
+  // 360 days between missions (changed from 365)
   const year = Math.floor(state.hour / HOURS_PER_YEAR);
   state.missions.nextHour =
     (year + 1) * HOURS_PER_YEAR + BALANCE.firstMissionDay * HOURS_PER_DAY;
@@ -337,15 +351,71 @@ function resolveMission(state, rand) {
   const active = state.missions.active;
   if (!active) return;
 
-  const chance = clamp(
-    active.template.baseChance +
-      state.research.bonus +
-      (atmosphereEfficiency(state) - 1) * 0.25 +
-      (state.shield / 100 - 0.5) * 0.12,
-    0.05,
-    0.98,
-  );
-  const success = rand() < chance;
+  // DETERMINISTIC mission success based on requirements
+  const template = active.template;
+  const requirements = template.requirements || {};
+  let success = true;
+  let failureReasons = [];
+
+  // Check power factor requirement
+  if (requirements.minPowerFactor) {
+    const rates = getRates(state); // Need to get rates for power factor
+    if (rates.powerFactor < requirements.minPowerFactor) {
+      success = false;
+      failureReasons.push(`Insufficient power (${Math.round(rates.powerFactor * 100)}% < ${Math.round(requirements.minPowerFactor * 100)}%)`);
+    }
+  }
+
+  // Check shield requirement
+  if (requirements.minShield) {
+    if (state.shield < requirements.minShield) {
+      success = false;
+      failureReasons.push(`Shield too weak (${Math.round(state.shield)}% < ${requirements.minShield}%)`);
+    }
+  }
+
+  // Check free berths requirement
+  if (requirements.minFreeBerths) {
+    const capacity = crewCapacity(state);
+    const freeBerths = capacity - state.crew.total;
+    if (freeBerths < requirements.minFreeBerths) {
+      success = false;
+      failureReasons.push(`Insufficient berths (${freeBerths} free < ${requirements.minFreeBerths} required)`);
+    }
+  }
+
+  // Check food requirement
+  if (requirements.minFood) {
+    if ((state.resources.food ?? 0) < requirements.minFood) {
+      success = false;
+      failureReasons.push(`Insufficient food (${Math.round(state.resources.food ?? 0)} < ${requirements.minFood})`);
+    }
+  }
+
+  // Check materials requirement
+  if (requirements.minMaterials) {
+    if ((state.resources.materials ?? 0) < requirements.minMaterials) {
+      success = false;
+      failureReasons.push(`Insufficient materials (${Math.round(state.resources.materials ?? 0)} < ${requirements.minMaterials})`);
+    }
+  }
+
+  // Check crew requirement
+  if (requirements.minCrew) {
+    if (state.crew.total < requirements.minCrew) {
+      success = false;
+      failureReasons.push(`Insufficient crew (${state.crew.total} < ${requirements.minCrew})`);
+    }
+  }
+
+  // Check lab requirement
+  if (requirements.labRequired) {
+    if ((state.buildings.lab ?? 0) <= 0 || conditionOf(state, 'lab') <= 0) {
+      success = false;
+      failureReasons.push('Research Lab not operational');
+    }
+  }
+
   const name = active.template.name;
 
   state.missions.history.unshift({
@@ -353,13 +423,15 @@ function resolveMission(state, rand) {
     type: active.template.type,
     hour: state.hour,
     success,
-    chance,
+    chance: success ? 100 : 0, // Deterministic now
+    failureReasons: failureReasons.length > 0 ? failureReasons : undefined,
   });
   if (state.missions.history.length > 20) state.missions.history.length = 20;
 
   if (!success) {
     state.missions.active = null;
-    defeat(state, `Critical mission failed: ${name}.`);
+    const reason = `Mission failed: ${name}. ${failureReasons.join('; ')}`;
+    defeat(state, reason);
     return;
   }
 
@@ -484,7 +556,7 @@ function applyConditions(state, rand) {
 }
 
 /* --------------------------------------------------------------------------
- * Crowding
+ * Crowding - 48 hours grace then game over
  * ------------------------------------------------------------------------ */
 
 function applyCrowding(state) {
@@ -494,8 +566,8 @@ function applyCrowding(state) {
     notify(
       state,
       'crowding',
-      24,
-      `Overcrowded: ${state.crew.total} crew, ${capacity} berths. Build a habitat before the base collapses.`,
+      12,
+      `Overcrowded: ${state.crew.total} crew, ${capacity} berths. Build a habitat within ${BALANCE.crowdingGraceHours - state.crowdingHours}h or the base collapses.`,
       'bad',
     );
     if (state.crowdingHours >= BALANCE.crowdingGraceHours) {

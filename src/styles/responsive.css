@@ -34,6 +34,9 @@
   .building-card { grid-template-columns: 50px 1fr 100px auto; gap: 12px; }
   .card-details { min-width: 80px; }
   .card-cost { order: 0; }
+  .zoom-controls { gap: 3px; padding: 2px 4px; }
+  .zoom-level { min-width: 40px; font-size: 10px; }
+  .zoom-controls .btn { padding: 3px 6px; font-size: 11px; }
 }
 
 /* --------------------------------------------------------------------------

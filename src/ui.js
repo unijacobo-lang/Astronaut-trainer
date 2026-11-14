@@ -116,6 +116,11 @@ export function buildUI(state, handlers) {
   const overlayReason = document.getElementById('overlay-reason');
   const overlayStats = document.getElementById('overlay-stats');
   const overlayRestart = document.getElementById('overlay-restart');
+  // Zoom controls
+  const btnZoomIn = document.getElementById('btn-zoom-in');
+  const btnZoomOut = document.getElementById('btn-zoom-out');
+  const btnZoomReset = document.getElementById('btn-zoom-reset');
+  const zoomLevel = document.getElementById('zoom-level');
 
   /* Status chips ---------------------------------------------------------- */
   const resourceDefs = [
@@ -389,6 +394,10 @@ export function buildUI(state, handlers) {
   for (const btn of speedBtns) {
     btn.addEventListener('click', () => handlers.onSpeed(Number(btn.dataset.speed)));
   }
+  // Zoom controls
+  btnZoomIn.addEventListener('click', () => ui.scene.setZoom(ui.scene.getZoom() + 0.25));
+  btnZoomOut.addEventListener('click', () => ui.scene.setZoom(ui.scene.getZoom() - 0.25));
+  btnZoomReset.addEventListener('click', () => ui.scene.resetView());
   resetBtn.addEventListener('click', () => {
     if (window.confirm('Start a new lunar base? The current save will be deleted.')) {
       handlers.onReset();
@@ -419,6 +428,19 @@ export function buildUI(state, handlers) {
     if (event.key === '1') handlers.onSpeed(1);
     if (event.key === '2') handlers.onSpeed(2);
     if (event.key === '4') handlers.onSpeed(4);
+    // Zoom shortcuts
+    if (event.ctrlKey || event.metaKey) {
+      if (event.key === '+' || event.key === '=') {
+        event.preventDefault();
+        ui.scene.setZoom(ui.scene.getZoom() + 0.25);
+      } else if (event.key === '-') {
+        event.preventDefault();
+        ui.scene.setZoom(ui.scene.getZoom() - 0.25);
+      } else if (event.key === '0') {
+        event.preventDefault();
+        ui.scene.resetView();
+      }
+    }
   });
 
   overlayRestart.addEventListener('click', () => handlers.onReset());
@@ -452,6 +474,11 @@ export function buildUI(state, handlers) {
     missionHistory,
     shieldMaintenance,
     healthMaintenance,
+    // Zoom controls
+    btnZoomIn,
+    btnZoomOut,
+    btnZoomReset,
+    zoomLevel,
     lastLogId: null,
     structureSignature: '',
     structureRefs: {},
@@ -672,6 +699,20 @@ export function render(state, ui) {
   ui.pauseBtn.classList.toggle('is-active', state.paused);
   for (const btn of ui.speedBtns) {
     btn.classList.toggle('is-active', Number(btn.dataset.speed) === state.speed);
+  }
+  // Update speed button titles with current speeds
+  for (const btn of ui.speedBtns) {
+    const speed = Number(btn.dataset.speed);
+    const hoursPerSec = [3, 6, 12][speed - 1] || 3;
+    btn.title = `${speed}× — ${hoursPerSec} hours per second`;
+  }
+  // Update zoom level display
+  if (ui.zoomLevel && ui.scene) {
+    const zoom = Math.round(ui.scene.getZoom() * 100);
+    ui.zoomLevel.textContent = `${zoom}%`;
+    // Update button states
+    if (ui.btnZoomIn) ui.btnZoomIn.disabled = ui.scene.getZoom() >= 3;
+    if (ui.btnZoomOut) ui.btnZoomOut.disabled = ui.scene.getZoom() <= 0.5;
   }
 
   /* Defeat overlay ------------------------------------------------------- */

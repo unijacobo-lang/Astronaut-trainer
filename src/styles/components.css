@@ -190,6 +190,7 @@
 
 .shelter-card { display: flex; align-items: center; justify-content: space-between; gap: 14px; padding: 12px; border-radius: var(--radius-sm); border: 1px solid rgba(111, 183, 255, 0.25); background: rgba(111, 183, 255, 0.05); }
 .shelter-card h3, .assignments h3, .radiation-card h3 { font-size: 12.5px; margin-bottom: 3px; }
+.shelter-card .btn.is-active { background: linear-gradient(180deg, #ff6b6b, #e55a5a); border-color: #ff6b6b; color: #fff; }
 .assignments ul { list-style: none; margin: 8px 0 0; padding: 0; display: flex; flex-direction: column; gap: 5px; }
 .assignment { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 7px 9px; border-radius: 8px; border: 1px solid var(--line); background: rgba(255, 255, 255, 0.025); font-size: 11.5px; }
 .assignment span:last-child { color: var(--muted); font-size: 10.5px; white-space: nowrap; }

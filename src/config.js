@@ -14,16 +14,16 @@
  *     storms up to 7000.
  */
 
-export const SAVE_VERSION = 2;
+export const SAVE_VERSION = 3; // Incremented for new mechanics
 
 export const HOURS_PER_DAY = 24;
 export const DAYS_PER_YEAR = 365;
 export const HOURS_PER_YEAR = DAYS_PER_YEAR * HOURS_PER_DAY;
 
-/** Simulated hours per real second at each speed setting. */
-export const SPEEDS = { 1: 6, 2: 12, 4: 24 };
+/** Simulated hours per real second at each speed setting. Slower = more deliberate pace. */
+export const SPEEDS = { 1: 3, 2: 6, 4: 12 };
 
-export const MAX_LOG = 80;
+export const MAX_LOG = 100;
 
 /* --------------------------------------------------------------------------
    Resources
@@ -47,8 +47,8 @@ export const BALANCE = {
   /** Crew and housing. */
   startCrew: 4,
   baseCrewCapacity: 2,
-  /** Hours the base can stay overcrowded before it collapses. */
-  crowdingGraceHours: 72,
+  /** Hours the base can stay overcrowded before crew starts dying. Now 48h (2 days) grace period. */
+  crowdingGraceHours: 48,
 
   /** Supplies the run starts with. */
   startResources: {
@@ -111,7 +111,7 @@ export const BALANCE = {
   /** Missions. */
   firstMissionDay: 30,
   missionDeadlineDays: 75,
-  missionIntervalDays: 365,
+  missionIntervalDays: 360, // Changed from 365 to 360
 
   /** Maintenance. */
   repairMaterials: 100,
@@ -119,8 +119,10 @@ export const BALANCE = {
   repairAmount: 45,
   degradedCondition: 35,
 
-  /** Research. */
+  /** Research - now has failure chance. */
   researchBaseBonus: 0,
+  researchMinChance: 0.15, // Minimum success chance even with bad conditions
+  researchMaxChance: 0.95, // Maximum success chance even with perfect conditions
 };
 
 /* --------------------------------------------------------------------------
@@ -134,7 +136,7 @@ export const START = {
     battery: 1,
     oxygenGenerator: 1,
     lab: 1,
-    shelter: 1,
+    shelter: 0, // Shelter now requires research!
   },
 };
 
@@ -244,7 +246,7 @@ const buildingDefs = {
   shelter: {
     name: 'Radiation Shelter',
     icon: '\u{1F6E1}\u{FE0F}',
-    blurb: 'Shields six astronauts during solar storms.',
+    blurb: 'Shields six astronauts during solar storms. Requires Radiation Shielding research.',
     cost: { money: 1_600_000, materials: 450 },
     buildHours: 30,
     crew: 1,
@@ -252,6 +254,7 @@ const buildingDefs = {
     capacity: 0,
     shelterCapacity: 6,
     maintenance: 0.03,
+    requires: 'radiationShielding', // Now requires research!
     category: 'life',
   },
 };
@@ -279,66 +282,115 @@ export const BUILDINGS = buildingDefs;
    ------------------------------------------------------------------------ */
 
 const researchDefs = {
+  // TIER 1: Foundation
   waterRecycling: {
     name: 'Water Recycling',
-    blurb: 'Unlocks the Water Reclaimer.',
+    blurb: 'Unlocks the Water Reclaimer. Recovers water from air and waste.',
     cost: { money: 3_000_000, water: 150, food: 50, oxygen: 30 },
     crew: 1, hours: 200, chance: 0.75, unlocks: ['waterReclaimer'],
+    requires: [],
+    tier: 1,
   },
-  hydroponics: {
-    name: 'Hydroponics',
-    blurb: 'Unlocks the Greenhouse.',
-    cost: { money: 3_500_000, water: 220, food: 40, oxygen: 35 },
-    crew: 1, hours: 280, chance: 0.7, unlocks: ['greenhouse'],
-  },
-  fabrication: {
-    name: 'In-Situ Fabrication',
-    blurb: 'Unlocks the Regolith Fabricator.',
-    cost: { money: 4_500_000, water: 130, food: 60, oxygen: 40 },
-    crew: 2, hours: 350, chance: 0.65, unlocks: ['fabricator'], requires: ['hydroponics'],
-  },
+  
+  // TIER 2: Life Support Upgrades
   highYieldElectrolysis: {
     name: 'High-Yield Electrolysis',
-    blurb: 'Oxygen generators produce 25% more O2.',
+    blurb: 'Oxygen generators produce 25% more O₂ from the same water.',
     cost: { money: 2_500_000, water: 100, food: 40, oxygen: 25 },
     crew: 1, hours: 180, chance: 0.8, effects: { oxygenOutput: 1.25 },
-  },
-  reinforcedShielding: {
-    name: 'Reinforced Shielding',
-    blurb: 'The radiation shield degrades 30% slower.',
-    cost: { money: 3_000_000, water: 80, food: 50, oxygen: 50 },
-    crew: 1, hours: 250, chance: 0.65, effects: { shieldWear: 0.7 },
-  },
-  solarTracking: {
-    name: 'Solar Tracking',
-    blurb: 'Solar arrays produce 30% more power.',
-    cost: { money: 2_200_000, water: 80, food: 40, oxygen: 25 },
-    crew: 1, hours: 180, chance: 0.8, effects: { solarOutput: 1.3 },
+    requires: ['waterRecycling'],
+    tier: 2,
   },
   closedLoopLifeSupport: {
     name: 'Closed-Loop Life Support',
-    blurb: 'Crew consume 15% less food.',
+    blurb: 'Crew consume 15% less food through advanced recycling.',
     cost: { money: 3_500_000, water: 130, food: 75, oxygen: 40 },
-    crew: 2, hours: 300, chance: 0.7, effects: { foodConsumption: 0.85 }, requires: ['waterRecycling'],
+    crew: 2, hours: 300, chance: 0.7, effects: { foodConsumption: 0.85 },
+    requires: ['waterRecycling'],
+    tier: 2,
   },
+  
+  // TIER 3: Food Production
+  hydroponics: {
+    name: 'Hydroponics',
+    blurb: 'Unlocks the Greenhouse. Grow food from water and nutrients.',
+    cost: { money: 3_500_000, water: 220, food: 40, oxygen: 35 },
+    crew: 1, hours: 280, chance: 0.7, unlocks: ['greenhouse'],
+    requires: ['highYieldElectrolysis', 'closedLoopLifeSupport'],
+    tier: 3,
+  },
+  
+  // TIER 4: Power & Protection
+  solarTracking: {
+    name: 'Solar Tracking',
+    blurb: 'Solar arrays produce 30% more power by following the sun.',
+    cost: { money: 2_200_000, water: 80, food: 40, oxygen: 25 },
+    crew: 1, hours: 180, chance: 0.8, effects: { solarOutput: 1.3 },
+    requires: ['hydroponics'],
+    tier: 4,
+  },
+  radiationShielding: {
+    name: 'Radiation Shielding',
+    blurb: 'Unlocks the Radiation Shelter. Enables building shelters to protect crew during storms.',
+    cost: { money: 3_000_000, water: 80, food: 50, oxygen: 50 },
+    crew: 1, hours: 250, chance: 0.65, unlocks: ['shelter'],
+    requires: ['hydroponics'],
+    tier: 4,
+  },
+  
+  // TIER 5: Industrial
+  fabrication: {
+    name: 'In-Situ Fabrication',
+    blurb: 'Unlocks the Regolith Fabricator. Produce materials from lunar dust.',
+    cost: { money: 4_500_000, water: 130, food: 60, oxygen: 40 },
+    crew: 2, hours: 350, chance: 0.65, unlocks: ['fabricator'],
+    requires: ['solarTracking', 'radiationShielding'],
+    tier: 5,
+  },
+  
+  // TIER 6: Advanced
   radiationMedicine: {
     name: 'Radiation Medicine',
-    blurb: 'Crew resist radiation sickness 40% better.',
+    blurb: 'Crew resist radiation sickness 40% better. Reduces illness duration.',
     cost: { money: 2_800_000, water: 100, food: 60, oxygen: 35 },
     crew: 1, hours: 220, chance: 0.6, effects: { radiationResistance: 0.6 },
+    requires: ['fabrication'],
+    tier: 6,
   },
   habitatExpansion: {
     name: 'Expandable Habitats',
-    blurb: 'Each habitat houses one extra astronaut.',
+    blurb: 'Each habitat houses 1 extra astronaut. Increases capacity to 5 per module.',
     cost: { money: 4_000_000, water: 100, food: 70, oxygen: 40 },
-    crew: 2, hours: 320, chance: 0.75, effects: { habitatCapacity: 1 }, requires: ['hydroponics'],
+    crew: 2, hours: 320, chance: 0.75, effects: { habitatCapacity: 1 },
+    requires: ['radiationMedicine'],
+    tier: 6,
+  },
+  reinforcedShielding: {
+    name: 'Reinforced Shielding',
+    blurb: 'The radiation shield degrades 30% slower. Requires Radiation Shielding research.',
+    cost: { money: 3_500_000, water: 100, food: 60, oxygen: 60 },
+    crew: 1, hours: 280, chance: 0.65, effects: { shieldWear: 0.7 },
+    requires: ['radiationShielding'],
+    tier: 6,
   },
 };
 
+export const RESEARCH_TIERS = [
+  { tier: 1, name: 'Foundation', desc: 'Core life support recycling' },
+  { tier: 2, name: 'Life Support', desc: 'Oxygen efficiency and food recycling' },
+  { tier: 3, name: 'Food Production', desc: 'Hydroponic farming' },
+  { tier: 4, name: 'Power & Protection', desc: 'Solar optimization and radiation shielding' },
+  { tier: 5, name: 'Industrial', desc: 'In-situ material fabrication' },
+  { tier: 6, name: 'Advanced', desc: 'Medical advances and habitat expansion' },
+];
+
 export const RESEARCH_ORDER = [
-  'waterRecycling', 'hydroponics', 'fabrication',
-  'highYieldElectrolysis', 'reinforcedShielding', 'solarTracking',
-  'closedLoopLifeSupport', 'radiationMedicine', 'habitatExpansion'
+  'waterRecycling',
+  'highYieldElectrolysis', 'closedLoopLifeSupport',
+  'hydroponics',
+  'solarTracking', 'radiationShielding',
+  'fabrication',
+  'radiationMedicine', 'habitatExpansion', 'reinforcedShielding'
 ];
 
 export const RESEARCH = researchDefs;
@@ -351,40 +403,58 @@ export const RESEARCH_ICONS = {
   waterRecycling: '\u{267B}\u{FE0F}', hydroponics: '\u{1F331}', fabrication: '\u{1F3D7}\u{FE0F}',
   highYieldElectrolysis: '\u{1FAD7}', reinforcedShielding: '\u{1F6E1}\u{FE0F}', solarTracking: '\u{1F506}',
   closedLoopLifeSupport: '\u{1F504}', radiationMedicine: '\u{1F48A}', habitatExpansion: '\u{1F3E0}',
+  radiationShielding: '\u{1F6E1}\u{FE0F}',
 };
 
 /* --------------------------------------------------------------------------
-   Missions
+   Missions - More complex, deterministic success based on conditions
    ------------------------------------------------------------------------ */
 
 const missionTemplates = [
   {
     type: 'Expansion',
     name: 'Shackleton Ridge Outpost',
-    brief: 'Build a relay station on the ridge to extend surface operations.',
-    crew: 2, money: 2_000_000, materials: 250, hours: 72, baseChance: 0.8,
+    brief: 'Build a relay station on the ridge to extend surface operations. Requires stable power and shield.',
+    crew: 2, money: 2_000_000, materials: 250, hours: 72, 
+    // Success conditions: power factor > 0.8, shield > 40%
     reward: { money: 6_000_000, materials: 350, crew: 1 },
+    requirements: { minPowerFactor: 0.8, minShield: 40 },
   },
   {
     type: 'Rescue',
     name: 'SELENE-4 Distress Call',
-    brief: 'A survey crew is stranded after a rover failure. Bring them home.',
-    crew: 3, money: 1_000_000, materials: 0, hours: 48, baseChance: 0.75,
+    brief: 'A survey crew is stranded after a rover failure. Bring them home. Requires available crew and medical capacity.',
+    crew: 3, money: 1_000_000, materials: 0, hours: 48, 
+    // Success conditions: crew capacity for +2, food > 200
     reward: { crew: 2, money: 3_000_000, food: 120 },
+    requirements: { minFreeBerths: 2, minFood: 200 },
   },
   {
     type: 'Emergency',
     name: 'Micrometeorite Breach',
-    brief: 'A debris swarm punctured the service tunnel. Seal it before pressure drops.',
-    crew: 4, money: 500_000, materials: 200, hours: 24, baseChance: 0.7,
+    brief: 'A debris swarm punctured the service tunnel. Seal it before pressure drops. Requires materials and crew.',
+    crew: 4, money: 500_000, materials: 200, hours: 24, 
+    // Success conditions: materials > 300, crew > 4
     reward: { money: 4_000_000, oxygen: 80, materials: 150 },
+    requirements: { minMaterials: 300, minCrew: 4 },
   },
   {
     type: 'Science',
     name: 'Deep Core Survey',
-    brief: 'Drill into the polar ice sheet and return with samples.',
-    crew: 2, money: 1_500_000, materials: 0, hours: 96, baseChance: 0.82,
+    brief: 'Drill into the polar ice sheet and return with samples. Requires lab and power.',
+    crew: 2, money: 1_500_000, materials: 0, hours: 96, 
+    // Success conditions: lab operational, power factor > 0.9
     reward: { money: 5_000_000, researchBonus: 0.15 },
+    requirements: { minPowerFactor: 0.9, labRequired: true },
+  },
+  {
+    type: 'Construction',
+    name: 'Lava Tube Habitat',
+    brief: 'Establish a permanent habitat in a lava tube. Major construction effort.',
+    crew: 3, money: 3_000_000, materials: 500, hours: 120,
+    // Success conditions: materials > 800, crew > 5, shield > 50%
+    reward: { money: 10_000_000, materials: 500, crew: 2 },
+    requirements: { minMaterials: 800, minCrew: 5, minShield: 50 },
   },
 ];
 
@@ -413,6 +483,7 @@ export function effectChips(def) {
   
   chips.push({ text: `\u{23F1} ${def.buildHours}h`, title: 'Construction time' });
   chips.push({ text: `\u{1F469}\u{200D}\u{1F680} ${def.crew}`, title: 'Idle crew required' });
+  if (def.requires) chips.push({ text: `\u{1F512} Requires: ${RESEARCH[def.requires]?.name ?? def.requires}`, title: 'Research prerequisite' });
   
   return chips;
 }
