@@ -1,11 +1,16 @@
 # ☾ Lunar Outpost — Base Management
 
+[![Deploy to GitHub Pages](https://github.com/unijacobo-lang/Astronaut-trainer/actions/workflows/deploy.yml/badge.svg)](https://github.com/unijacobo-lang/Astronaut-trainer/actions/workflows/deploy.yml)
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![Vite](https://img.shields.io/badge/Vite-5.4-646CFF?logo=vite)](https://vitejs.dev/)
+[![Vanilla JS](https://img.shields.io/badge/Vanilla%20JS-ES%20Modules-F7DF1E?logo=javascript)](https://developer.mozilla.org/en-US/docs/Web/JavaScript/Guide/Modules)
+
 A lunar base management simulation built for the **NASA Space Apps Challenge**.
 Build a sustainable outpost on the Moon: manage oxygen, water, food, materials
 and budget, research new technology, and survive the yearly mission that decides
 the fate of the base.
 
-> Play it live: **https://unijacobo-lang.github.io/Astronaut-trainer/**
+> 🎮 **Play it live: https://unijacobo-lang.github.io/Astronaut-trainer/**
 
 ---
 
@@ -101,6 +106,15 @@ Astronaut-trainer/
 - [Vite](https://vitejs.dev/) for dev server & bundling
 - Canvas 2D for the base scene
 - No runtime dependencies
+
+## 📦 Deployment
+
+The project uses GitHub Actions to automatically build and deploy to GitHub Pages on every push to `main`:
+
+1. Push to `main` branch
+2. GitHub Actions runs `npm run build`
+3. Artifacts uploaded to Pages
+4. Live at: **https://unijacobo-lang.github.io/Astronaut-trainer/**
 
 ## 🤝 Contributing
 
