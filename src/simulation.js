@@ -49,7 +49,7 @@ export function step(state, rand = Math.random) {
 
   const mods = researchModifiers(state);
   updateRadiation(state, rand);
-  updateShield(state, mods);
+  
 
   // Clamp stored power before anything reads it.
   state.energy.capacity = energyCapacity(state);
@@ -184,19 +184,6 @@ function updateRadiation(state, rand) {
       'warn',
     );
     log(state, 'Move the crew into the radiation shelter until it passes.', 'info');
-  }
-}
-
-function updateShield(state, mods) {
-  const wear = BALANCE.shieldDecayPerRadiation * state.radiation.level * mods.shieldWear;
-  const before = state.shield;
-  state.shield = Math.max(0, state.shield - wear);
-
-  if (before > BALANCE.shieldDanger && state.shield <= BALANCE.shieldDanger) {
-    log(state, 'Radiation shield below 50% — illness risk is rising. Reinforce it.', 'warn');
-  }
-  if (before > BALANCE.shieldCritical && state.shield <= BALANCE.shieldCritical) {
-    log(state, 'Radiation shield critical. Crew should shelter during storms.', 'bad');
   }
 }
 

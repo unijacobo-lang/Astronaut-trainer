@@ -30,7 +30,6 @@ import {
   idleCrew,
   missingFor,
   missionChance,
-  shelteredCrew,
   worstCondition,
 } from './state.js';
 
@@ -89,7 +88,6 @@ export function buildUI(state, handlers) {
   const stats = document.getElementById('stats');
   const structures = document.getElementById('structures');
   const structureCount = document.getElementById('structure-count');
-  const shieldMaintenance = document.getElementById('shield-maintenance');
   const healthMaintenance = document.getElementById('health-maintenance');
   const imports = document.getElementById('imports');
   const researchGrid = document.getElementById('research');
@@ -111,7 +109,6 @@ export function buildUI(state, handlers) {
   const badgeMissions = document.getElementById('badge-missions');
   const hudO2 = document.getElementById('hud-o2');
   const hudPower = document.getElementById('hud-power');
-  const hudRad = document.getElementById('hud-rad');
   const overlay = document.getElementById('overlay');
   const overlayReason = document.getElementById('overlay-reason');
   const overlayStats = document.getElementById('overlay-stats');
@@ -131,7 +128,6 @@ export function buildUI(state, handlers) {
     { key: 'materials', label: 'Materials', icon: '\u{1F9F1}' },
     { key: 'money', label: 'Budget', icon: '\u{1F4B5}' },
     { key: 'crew', label: 'Crew', icon: '\u{1F469}\u{200D}\u{1F680}' },
-    { key: 'shield', label: 'Shield', icon: '\u{1F6E1}\u{FE0F}' },
   ];
 
   const resourceRefs = {};
@@ -346,27 +342,9 @@ export function buildUI(state, handlers) {
       <div class="crew-stat"><span>Deaths</span><strong data-crew="deaths">—</strong></div>
     </div>
 
-    <div class="shelter-card">
-      <div>
-        <h3>Radiation Shelter</h3>
-        <p class="panel-sub" data-shelter-text>—</p>
-      </div>
-      <button class="btn btn-primary" type="button" data-shelter>Shelter crew</button>
-    </div>
-
     <div class="assignments">
       <h3>Assignments</h3>
       <ul data-assignments></ul>
-    </div>
-
-    <div class="radiation-card">
-      <h3>Environment</h3>
-      <div class="radiation-grid">
-        <div><span>Radiation</span><strong data-rad="level">—</strong></div>
-        <div><span>Shield</span><strong data-rad="shield">—</strong></div>
-        <div><span>Storm</span><strong data-rad="storm">—</strong></div>
-        <div><span>Work efficiency</span><strong data-rad="efficiency">—</strong></div>
-      </div>
     </div>
   `;
 
@@ -377,17 +355,8 @@ export function buildUI(state, handlers) {
     idle: crew.querySelector('[data-crew="idle"]'),
     berths: crew.querySelector('[data-crew="berths"]'),
     deaths: crew.querySelector('[data-crew="deaths"]'),
-    shelterText: crew.querySelector('[data-shelter-text]'),
-    shelterBtn: crew.querySelector('[data-shelter]'),
     assignments: crew.querySelector('[data-assignments]'),
-    radiation: {
-      level: crew.querySelector('[data-rad="level"]'),
-      shield: crew.querySelector('[data-rad="shield"]'),
-      storm: crew.querySelector('[data-rad="storm"]'),
-      efficiency: crew.querySelector('[data-rad="efficiency"]'),
-    },
   };
-  crewRefs.shelterBtn.addEventListener('click', () => handlers.onShelter());
 
   /* Controls -------------------------------------------------------------- */
   pauseBtn.addEventListener('click', () => handlers.onTogglePause());
@@ -464,7 +433,7 @@ export function buildUI(state, handlers) {
     badgeMissions,
     hudO2,
     hudPower,
-    hudRad,
+    
     overlay,
     overlayReason,
     overlayStats,
@@ -472,7 +441,6 @@ export function buildUI(state, handlers) {
     researchStatus,
     mission,
     missionHistory,
-    shieldMaintenance,
     healthMaintenance,
     // Zoom controls
     btnZoomIn,
@@ -482,8 +450,6 @@ export function buildUI(state, handlers) {
     lastLogId: null,
     structureSignature: '',
     structureRefs: {},
-    shieldSignature: '',
-    shieldRefs: {},
     healthSignature: '',
     healthRefs: {},
     missionSignature: '',
@@ -514,7 +480,6 @@ export function render(state, ui) {
   const netPower = rates.powerProduced - rates.powerDemand;
   const idle = idleCrew(state);
   const berths = crewCapacity(state);
-  const sheltered = shelteredCrew(state);
 
   /* Resource chips -------------------------------------------------------- */
   const chips = ui.resourceRefs;
@@ -550,14 +515,6 @@ export function render(state, ui) {
   chips.crew.sub.textContent = `${idle} idle · ${state.crew.ill} ill`;
   setLevel(chips.crew.root, state.crew.ill > 0 ? 'is-warn' : state.crew.total > berths ? 'is-bad' : 'is-good');
 
-  chips.shield.value.textContent = `${Math.round(state.shield)}%`;
-  chips.shield.sub.textContent = state.crew.sheltered
-    ? `${sheltered} sheltered`
-    : state.radiation.stormHours > 0
-      ? 'storm active'
-      : 'stable';
-  setLevel(chips.shield.root, state.shield < BALANCE.shieldCritical ? 'is-bad' : state.shield < BALANCE.shieldDanger ? 'is-warn' : 'is-good');
-
   /* Header clock and scene HUD ------------------------------------------- */
   const clockText = formatClock(state);
   ui.clock.textContent = clockText;
@@ -571,9 +528,6 @@ export function render(state, ui) {
       ? `⚡ LOW POWER ${Math.round(rates.powerFactor * 100)}%`
       : `⚡ ${fmt(rates.powerProduced, 0)} / ${fmt(rates.powerDemand, 0)} kW`;
   ui.hudPower.className = `scene-chip ${rates.powerFactor < 0.999 ? 'is-warn' : 'is-good'}`;
-
-  ui.hudRad.textContent = `☢ ${Math.round(state.radiation.level)} µSv/h`;
-  ui.hudRad.className = `scene-chip ${state.radiation.stormHours > 0 ? 'is-bad' : 'is-good'}`;
 
   /* Stats ---------------------------------------------------------------- */
   ui.statRefs.berths.textContent = `${state.crew.total} / ${berths}`;
@@ -642,7 +596,6 @@ export function render(state, ui) {
 
   /* Maintenance panel ---------------------------------------------------- */
   renderMaintenanceStructures(state, ui, idle);
-  renderMaintenanceShield(state, ui, idle);
   renderMaintenanceHealth(state, ui, idle);
 
   /* Imports -------------------------------------------------------------- */
@@ -659,7 +612,7 @@ export function render(state, ui) {
   renderMission(state, ui, idle);
 
   /* Crew ----------------------------------------------------------------- */
-  renderCrew(state, ui, idle, berths, sheltered, efficiency);
+  renderCrew(state, ui, idle, berths, efficiency);
 
   /* Alerts --------------------------------------------------------------- */
   renderAlerts(state, ui, atmosphere, efficiency, rates);
@@ -752,9 +705,7 @@ function renderStructures(state, ui, idle) {
         .reduce((sum, task) => sum + Math.ceil(task.hoursLeft), 0);
       return `${id}:${state.buildings[id]}:${Math.round(conditionOf(state, id) / 5)}:${taskHours}`;
     })
-    .join('|') + `|shield:${Math.round(state.shield / 5)}:${state.tasks
-      .filter((task) => task.kind === 'shield')
-      .reduce((sum, task) => sum + Math.ceil(task.hoursLeft), 0)}`;
+    .join('|');
 
   if (signature !== ui.structureSignature) {
     ui.structureSignature = signature;
@@ -785,27 +736,6 @@ function renderStructures(state, ui, idle) {
         button,
       };
     }
-
-    const shieldRow = document.createElement('div');
-    shieldRow.className = 'structure-row structure-shield';
-    shieldRow.innerHTML = `
-      <span class="structure-icon" aria-hidden="true">\u{1F6E1}\u{FE0F}</span>
-      <div class="structure-main">
-        <div class="structure-title"><strong>Radiation Shield</strong><span class="count" data-value>100%</span></div>
-        <div class="bar"><span data-bar></span></div>
-      </div>
-      <span class="structure-value" data-raw>100%</span>
-      <button class="btn btn-small" type="button" data-shield>Reinforce</button>
-    `;
-    const shieldBtn = shieldRow.querySelector('[data-shield]');
-    shieldBtn.addEventListener('click', () => ui.handlers.onReinforce());
-    frag.append(shieldRow);
-    ui.structureRefs.shield = {
-      row: shieldRow,
-      bar: shieldRow.querySelector('[data-bar]'),
-      raw: shieldRow.querySelector('[data-raw]'),
-      button: shieldBtn,
-    };
 
     ui.structureCount.textContent = ids.length ? `${ids.length} structure types online` : 'No structures';
     ui.attachToStructures(frag);
@@ -839,24 +769,6 @@ function renderStructures(state, ui, idle) {
             ? `Needs ${BALANCE.repairMaterials} materials`
             : `Repair worst unit (+${BALANCE.repairAmount}% in ${BALANCE.repairHours}h)`;
     if (def) refs.row.title = `${def.name} — mean condition ${Math.round(mean)}%, worst ${Math.round(worst)}%`;
-  }
-
-  const shieldRefs = ui.structureRefs.shield;
-  if (shieldRefs) {
-    const shieldTask = state.tasks.find((t) => t.kind === 'shield');
-    shieldRefs.bar.style.width = `${Math.max(0, Math.min(100, state.shield))}%`;
-    shieldRefs.bar.className = conditionClass(state.shield);
-    shieldRefs.raw.textContent = `${Math.round(state.shield)}%`;
-    shieldRefs.raw.className = `structure-value ${conditionClass(state.shield)}`;
-
-    const canReinforce = state.shield < 100 && !shieldTask && idle >= BALANCE.shieldRepairCrew && state.resources.materials >= BALANCE.shieldRepairMaterials && !state.outcome;
-    shieldRefs.button.disabled = !canReinforce;
-    shieldRefs.button.textContent = shieldTask ? `Reinforcing ${formatDuration(shieldTask.hoursLeft)}` : 'Reinforce';
-    shieldRefs.button.title = shieldTask
-      ? 'Shield crew already dispatched'
-      : state.shield >= 100
-        ? 'Shield is at full strength'
-        : `+${BALANCE.shieldRepairAmount}% for ${BALANCE.shieldRepairMaterials} materials (${BALANCE.repairHours}h)`;
   }
 }
 
@@ -906,7 +818,6 @@ function renderMaintenanceStructures(state, ui, idle) {
     }
 
     ui.structureCount.textContent = ids.length ? `${ids.length} structure types online` : 'No structures';
-    ui.shieldMaintenance.replaceChildren(frag);
   }
 
   for (const id of ids) {
@@ -940,58 +851,8 @@ function renderMaintenanceStructures(state, ui, idle) {
   }
 }
 
-function renderMaintenanceShield(state, ui, idle) {
-  const signature = `shield:${Math.round(state.shield / 5)}:${state.tasks
-    .filter((task) => task.kind === 'shield')
-    .reduce((sum, task) => sum + Math.ceil(task.hoursLeft), 0)}`;
-
-  if (signature !== ui.shieldSignature) {
-    ui.shieldSignature = signature;
-    ui.shieldRefs = {};
-
-    const shieldRow = document.createElement('div');
-    shieldRow.className = 'structure-row structure-shield';
-    shieldRow.innerHTML = `
-      <span class="structure-icon" aria-hidden="true">\u{1F6E1}\u{FE0F}</span>
-      <div class="structure-main">
-        <div class="structure-title"><strong>Radiation Shield</strong><span class="count" data-value>100%</span></div>
-        <div class="bar"><span data-bar></span></div>
-      </div>
-      <span class="structure-value" data-raw>100%</span>
-      <button class="btn btn-small" type="button" data-shield>Reinforce</button>
-    `;
-    const shieldBtn = shieldRow.querySelector('[data-shield]');
-    shieldBtn.addEventListener('click', () => ui.handlers.onReinforce());
-    ui.shieldMaintenance.append(shieldRow);
-    ui.shieldRefs.shield = {
-      row: shieldRow,
-      bar: shieldRow.querySelector('[data-bar]'),
-      raw: shieldRow.querySelector('[data-raw]'),
-      button: shieldBtn,
-    };
-  }
-
-  const shieldRefs = ui.shieldRefs.shield;
-  if (shieldRefs) {
-    const shieldTask = state.tasks.find((t) => t.kind === 'shield');
-    shieldRefs.bar.style.width = `${Math.max(0, Math.min(100, state.shield))}%`;
-    shieldRefs.bar.className = conditionClass(state.shield);
-    shieldRefs.raw.textContent = `${Math.round(state.shield)}%`;
-    shieldRefs.raw.className = `structure-value ${conditionClass(state.shield)}`;
-
-    const canReinforce = state.shield < 100 && !shieldTask && idle >= BALANCE.shieldRepairCrew && state.resources.materials >= BALANCE.shieldRepairMaterials && !state.outcome;
-    shieldRefs.button.disabled = !canReinforce;
-    shieldRefs.button.textContent = shieldTask ? `Reinforcing ${formatDuration(shieldTask.hoursLeft)}` : 'Reinforce';
-    shieldRefs.button.title = shieldTask
-      ? 'Shield crew already dispatched'
-      : state.shield >= 100
-        ? 'Shield is at full strength'
-        : `+${BALANCE.shieldRepairAmount}% for ${BALANCE.shieldRepairMaterials} materials (${BALANCE.repairHours}h)`;
-  }
-}
-
 function renderMaintenanceHealth(state, ui, idle) {
-  const signature = `health:${state.crew.ill}:${state.crew.total}:${state.crew.illHours}:${state.radiation.level}:${state.shield}`;
+  const signature = `health:${state.crew.ill}:${state.crew.total}:${state.crew.illHours}:${state.radiation.level}`;
 
   if (signature !== ui.healthSignature) {
     ui.healthSignature = signature;
@@ -1028,24 +889,6 @@ function renderMaintenanceHealth(state, ui, idle) {
       ui.healthRefs.ill = row;
     }
 
-    // Shield protection status
-    const sheltered = shelteredCrew(state);
-    const shelterCap = shelterCapacityOf(state);
-    const shieldRow = document.createElement('div');
-    shieldRow.className = 'structure-row';
-    shieldRow.innerHTML = `
-      <span class="structure-icon" aria-hidden="true">\u{1F6E1}\u{FE0F}</span>
-      <div class="structure-main">
-        <div class="structure-title"><strong>Shelter Status</strong><span class="count" data-count>${sheltered}/${state.crew.total}</span></div>
-        <div class="bar"><span data-bar style="width:${shelterCap > 0 ? Math.min(100, (sheltered / shelterCap) * 100) : 0}%"></span></div>
-      </div>
-      <span class="structure-value ${sheltered === state.crew.total ? 'is-good' : sheltered > 0 ? 'is-warn' : 'is-bad'}">
-        ${state.crew.sheltered ? 'Sheltered' : sheltered > 0 ? 'Partial' : 'Exposed'}
-      </span>
-    `;
-    frag.append(shieldRow);
-    ui.healthRefs.shelter = shieldRow;
-
     ui.healthMaintenance.replaceChildren(frag);
   }
 
@@ -1065,37 +908,7 @@ function renderMaintenanceHealth(state, ui, idle) {
       valueEl.className = 'structure-value is-good';
     }
   }
-
-  if (ui.healthRefs.shelter) {
-    const sheltered = shelteredCrew(state);
-    const shelterCap = shelterCapacityOf(state);
-    const countEl = ui.healthRefs.shelter.querySelector('[data-count]');
-    const barEl = ui.healthRefs.shelter.querySelector('[data-bar]');
-    const valueEl = ui.healthRefs.shelter.querySelector('.structure-value');
-    countEl.textContent = `${sheltered}/${state.crew.total}`;
-    barEl.style.width = `${shelterCap > 0 ? Math.min(100, (sheltered / shelterCap) * 100) : 0}%`;
-    valueEl.textContent = state.crew.sheltered ? 'Sheltered' : sheltered > 0 ? 'Partial' : 'Exposed';
-    valueEl.className = `structure-value ${sheltered === state.crew.total ? 'is-good' : sheltered > 0 ? 'is-warn' : 'is-bad'}`;
-  }
 }
-
-// Helper to avoid circular import
-function shelterCapacityOf(state) {
-  let capacity = 0;
-  for (const [id, count] of Object.entries(state.buildings)) {
-    const def = BUILDINGS[id];
-    if (!def?.shelterCapacity || count <= 0) continue;
-    const list = state.conditions[id] ?? [];
-    let intact = 0;
-    for (const value of list) if (value > 0) intact += 1;
-    capacity += def.shelterCapacity * (list.length ? intact : count);
-  }
-  return capacity;
-}
-
-/* --------------------------------------------------------------------------
- * Research
- * ------------------------------------------------------------------------ */
 
 function renderResearch(state, ui, idle) {
   const active = state.research.active;
@@ -1279,7 +1092,7 @@ function renderMission(state, ui, idle) {
  * Crew and alerts
  * ------------------------------------------------------------------------ */
 
-function renderCrew(state, ui, idle, berths, sheltered, efficiency) {
+function renderCrew(state, ui, idle, berths, efficiency) {
   const refs = ui.crewRefs;
   const healthy = Math.max(0, state.crew.total - state.crew.ill);
 
@@ -1289,15 +1102,6 @@ function renderCrew(state, ui, idle, berths, sheltered, efficiency) {
   refs.idle.textContent = `${idle}`;
   refs.berths.textContent = `${berths}`;
   refs.deaths.textContent = `${state.stats.deaths}`;
-
-  const shelterCap = state.crew.sheltered ? sheltered : shelterCapacityOf(state);
-  refs.shelterText.textContent = state.crew.sheltered
-    ? `Sheltered: ${sheltered}/${state.crew.total}. Work on construction, research and missions is paused. Shelter capacity ${shelterCap}.`
-    : `Radiation ${Math.round(state.radiation.level)} µSv/h. Shelter capacity ${shelterCap}. All ${state.crew.total} crew are exposed.`;
-  refs.shelterBtn.textContent = state.crew.sheltered ? 'Return to duties' : 'Shelter crew';
-  refs.shelterBtn.disabled = Boolean(state.outcome) || (!state.crew.sheltered && shelterCap <= 0);
-  refs.shelterBtn.classList.toggle('is-active', state.crew.sheltered);
-  refs.shelterBtn.title = shelterCap <= 0 ? 'Build a radiation shelter first' : '';
 
   const assignments = [];
   for (const task of state.tasks) {
@@ -1336,23 +1140,12 @@ function renderCrew(state, ui, idle, berths, sheltered, efficiency) {
       }),
     );
   }
-
-  refs.radiation.level.textContent = `${Math.round(state.radiation.level)} µSv/h`;
-  refs.radiation.shield.textContent = `${Math.round(state.shield)}%`;
-  refs.radiation.storm.textContent = state.radiation.stormHours > 0 ? `${state.radiation.stormHours}h remaining` : 'None';
-  refs.radiation.efficiency.textContent = `${Math.round(efficiency * 100)}%`;
 }
 
 function renderAlerts(state, ui, atmosphere, efficiency, rates) {
   const alerts = [];
   if (atmosphere < 19) {
     alerts.push({ text: `Oxygen ${atmosphere.toFixed(1)}% — efficiency ${Math.round(efficiency * 100)}%`, level: atmosphere < 13 ? 'is-bad' : 'is-warn' });
-  }
-  if (state.radiation.stormHours > 0) {
-    alerts.push({ text: `Solar storm — ${Math.round(state.radiation.level)} µSv/h`, level: 'is-bad' });
-  }
-  if (state.shield < BALANCE.shieldDanger) {
-    alerts.push({ text: `Shield ${Math.round(state.shield)}% — radiation risk elevated`, level: state.shield < BALANCE.shieldCritical ? 'is-bad' : 'is-warn' });
   }
   if (state.resources.water < 120) {
     alerts.push({ text: 'Water critical', level: 'is-bad' });

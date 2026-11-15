@@ -48,6 +48,7 @@
         Missions <span class="tab-badge" id="badge-missions" hidden></span>
       </button>
       <button class="tab" type="button" role="tab" aria-selected="false" data-tab="maintenance">Maintenance</button>
+      <button class="tab" type="button" role="tab" aria-selected="false" data-tab="imports">Imports</button>
       <button class="tab" type="button" role="tab" aria-selected="false" data-tab="crew">Crew</button>
     </nav>
 
@@ -59,7 +60,6 @@
             <div class="scene-hud" aria-hidden="true">
               <span class="scene-chip" id="hud-o2">O₂ 21.0%</span>
               <span class="scene-chip" id="hud-power">⚡ 18 / 14 kW</span>
-              <span class="scene-chip" id="hud-rad">☢ 260 µSv/h</span>
             </div>
             <div id="alerts" class="alerts" aria-live="polite"></div>
           </div>
@@ -76,15 +76,13 @@
           <div id="buildings" class="building-container"></div>
         </section>
 
-        <div class="split" data-panel="base">
-          <section class="panel">
-            <div class="panel-head">
-              <h2>Earth Imports</h2>
-            </div>
+        <section class="panel" data-panel="imports" hidden>
+          <div class="panel-head">
+            <h2>Earth Imports</h2>
             <p class="panel-sub">Every kilogram launched from Earth is expensive. Imports include a flat launch fee.</p>
-            <div id="imports" class="import-grid"></div>
-          </section>
-        </div>
+          </div>
+          <div id="imports" class="import-grid"></div>
+        </section>
 
         <section class="panel" data-panel="maintenance" hidden>
           <div class="panel-head">
@@ -145,7 +143,7 @@
     </main>
 
     <footer class="footer">
-      <span>Space — pause &nbsp;·&nbsp; 1 / 2 / 4 — speed &nbsp;·&nbsp; tabs: Base / Research / Missions / Maintenance / Crew</span>
+      <span>Space — pause &nbsp;·&nbsp; 1 / 2 / 4 — speed &nbsp;·&nbsp; tabs: Base / Research / Missions / Maintenance / Imports / Crew</span>
       <span id="save-status" class="save-status">autosaving</span>
     </footer>
   </div>
