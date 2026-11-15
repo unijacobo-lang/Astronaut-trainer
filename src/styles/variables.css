@@ -1,0 +1,51 @@
+/* ==========================================================================
+   CSS Variables - Lunar Outpost Design System
+   ========================================================================== */
+
+:root {
+  /* Colors */
+  --bg: #080b12;
+  --panel: rgba(16, 22, 33, 0.88);
+  --panel-2: rgba(22, 30, 44, 0.92);
+  --line: rgba(154, 176, 208, 0.14);
+  --line-strong: rgba(154, 176, 208, 0.28);
+  --text: #e7edf5;
+  --muted: #94a3b8;
+  --accent: #6fb7ff;
+  --accent-2: #8be0b0;
+  --good: #7ee0a0;
+  --warn: #ffc266;
+  --bad: #ff7a7a;
+  --gold: #e8cf8a;
+
+  /* Spacing */
+  --radius: 14px;
+  --radius-sm: 10px;
+  --radius-xs: 8px;
+
+  /* Shadows */
+  --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.15);
+  --shadow-md: 0 8px 24px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 18px 50px rgba(0, 0, 0, 0.22);
+
+  /* Transitions */
+  --transition-fast: 0.1s ease;
+  --transition-normal: 0.15s ease;
+  --transition-slow: 0.25s ease;
+
+  /* Typography */
+  --font-sans: "Segoe UI", system-ui, -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-mono: "SF Mono", "Fira Code", "Consolas", monospace;
+
+  /* Font sizes */
+  --fs-xxxs: 9px;
+  --fs-xxs: 10px;
+  --fs-xs: 11px;
+  --fs-sm: 12px;
+  --fs-base: 13px;
+  --fs-md: 14px;
+  --fs-lg: 16px;
+  --fs-xl: 18px;
+  --fs-xxl: 20px;
+  --fs-xxxl: 25px;
+}

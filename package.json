@@ -1,0 +1,26 @@
+{
+  "name": "lunar-outpost",
+  "version": "2.0.0",
+  "description": "Lunar Base Management Simulation - NASA Space Apps Challenge",
+  "type": "module",
+  "scripts": {
+    "dev": "vite",
+    "build": "vite build",
+    "preview": "vite preview",
+    "deploy": "npm run build && gh-pages -d dist"
+  },
+  "keywords": [
+    "nasa",
+      "space",
+    "simulation",
+    "lunar-base",
+    "game"
+  ],
+  "author": "unijacobo-lang",
+  "license": "MIT",
+  "homepage": "https://unijacobo-lang.github.io/Astronaut-trainer",
+  "devDependencies": {
+    "vite": "^5.0.0",
+    "gh-pages": "^6.0.0"
+  }
+}
