@@ -11,9 +11,9 @@ export default defineConfig({
     minify: 'esbuild',
     rollupOptions: {
       output: {
-        manualChunks: {
-          config: ['./src/config.js'],
-          simulation: ['./src/state.js', './src/simulation.js', './src/actions.js'],
+        manualChunks: (id) => {
+          if (id.includes('config.js')) return 'config';
+          if (id.includes('state.js') || id.includes('simulation.js') || id.includes('actions.js')) return 'simulation';
         },
       },
     },
