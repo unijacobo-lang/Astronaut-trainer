@@ -4,7 +4,7 @@ Lunar Outpost is a lunar base management game made for the **NASA Space Apps Cha
 
 ## Play online
 
-**https://unijacobo-lang.github.io/Astronaut-trainer/**
+**https://luis-ave.github.io/Astronaut-trainer/**
 
 ## Run locally
 
